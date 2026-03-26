@@ -12,8 +12,6 @@ Go client library for Fingerspot Auth Service. Provides login functions, JWT ver
 go get github.com/devbefingerspot/fio-authservice-go-client
 ```
 
-> Adjust the module path according to your project's `go.mod` configuration.
-
 ---
 
 
@@ -34,8 +32,6 @@ client := authclient.NewFioAuthClient(
 )
 defer client.Close() // close gRPC connection when done
 ```
-
-> **Note:** `my-s2s-key` harus sama dengan nilai `AUTH_S2S_KEY` di server auth-service.
 
 ### Additional Options
 
