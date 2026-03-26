@@ -10,7 +10,7 @@ Go client library untuk Fingerspot Auth Service. Menyediakan fungsi login, verif
 go get github.com/devbefingerspot/fio-authservice-go-client
 ```
 
-> Sesuaikan module path dengan konfigurasi `go.mod` di project kamu.
+> Sesuaikan module path dengan konfigurasi `go.mod` di project.
 
 ---
 
