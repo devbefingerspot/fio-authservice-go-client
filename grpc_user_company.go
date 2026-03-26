@@ -64,12 +64,14 @@ func pbToUserBasic(u *ucpb.UserBasic) *GrpcUserBasic {
 		return nil
 	}
 	return &GrpcUserBasic{
-		ID:        u.GetId(),
-		Name:      u.GetName(),
-		Email:     u.GetEmail(),
-		PhoneCode: u.GetPhoneCode(),
-		Phone:     u.GetPhone(),
-		Status:    u.GetStatus(),
+		ID:              u.GetId(),
+		Name:            u.GetName(),
+		Email:           u.GetEmail(),
+		PhoneCode:       u.GetPhoneCode(),
+		Phone:           u.GetPhone(),
+		Status:          u.GetStatus(),
+		EmailVerifiedAt: u.GetEmailVerifiedAt(),
+		PhoneVerifiedAt: u.GetPhoneVerifiedAt(),
 	}
 }
 
@@ -181,4 +183,45 @@ func (c *FioAuthClient) GrpcGetUserAllRelations(ctx context.Context, userID stri
 		Found:     resp.GetFound(),
 		Relations: pbToRelations(resp.GetRelations()),
 	}, nil
+}
+
+// GrpcGetCompanyWithEndpoint retrieves company info and its associated endpoint
+// info for the given companyID.
+//
+// Calls: /usercompany.UserCompanyService/GetCompanyWithEndpoint
+func (c *FioAuthClient) GrpcGetCompanyWithEndpoint(ctx context.Context, companyID string) (*GrpcGetCompanyWithEndpointResult, error) {
+	svc, err := c.ucClient()
+	if err != nil {
+		return nil, err
+	}
+	resp, err := svc.GetCompanyWithEndpoint(c.grpcContext(ctx), &ucpb.GetCompanyWithEndpointRequest{CompanyId: companyID})
+	if err != nil {
+		return nil, err
+	}
+	if !resp.GetFound() {
+		return &GrpcGetCompanyWithEndpointResult{Found: false}, nil
+	}
+	result := &GrpcGetCompanyWithEndpointResult{Found: true}
+	if c := resp.GetCompany(); c != nil {
+		result.Company = &GrpcCompanyInfo{
+			ID:                c.GetId(),
+			Name:              c.GetName(),
+			Email:             c.GetEmail(),
+			Phone:             c.GetPhone(),
+			DueDate:           c.GetDueDate(),
+			EndpointID:        c.GetEndpointId(),
+			DeviceLoginPolicy: c.GetDeviceLoginPolicy(),
+			MaxDevices:        c.GetMaxDevices(),
+		}
+	}
+	if e := resp.GetEndpoint(); e != nil {
+		result.Endpoint = &GrpcEndpointInfo{
+			ID:          e.GetId(),
+			BackendMode: e.GetBackendMode(),
+			BaseURL:     e.GetBaseUrl(),
+			DBDriver:    e.GetDbDriver(),
+			DBDSN:       e.GetDbDsn(),
+		}
+	}
+	return result, nil
 }

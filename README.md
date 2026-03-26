@@ -1,45 +1,49 @@
+
 # fio-auth-service-go-client
 
-Go client library untuk Fingerspot Auth Service. Menyediakan fungsi login, verifikasi JWT, OTP, S2S token, manajemen user-company, dan gRPC client untuk query internal.
+Go client library for Fingerspot Auth Service. Provides login functions, JWT verification, OTP, S2S token, user-company management, and a gRPC client for internal queries.
 
 ---
 
-## Instalasi
+
+## Installation
 
 ```bash
 go get github.com/devbefingerspot/fio-authservice-go-client
 ```
 
-> Sesuaikan module path dengan konfigurasi `go.mod` di project.
+> Adjust the module path according to your project's `go.mod` configuration.
 
 ---
 
-## Inisialisasi Client
+
+## Client Initialization
 
 ```go
 import authclient "github.com/devbefingerspot/fio-authservice-go-client"
 
 client := authclient.NewFioAuthClient(
-    "http://localhost:8080",       // base URL auth service (HTTP)
-    "auth-grpc.example.com:50051", // base URL gRPC server (kosongkan untuk pakai host yang sama)
-    "my-api-key",                  // API key untuk gRPC (kosongkan jika tidak dipakai)
+    "http://localhost:8080",       // base URL of auth service (HTTP)
+    "auth-grpc.example.com:50051", // gRPC server base URL (leave empty to use the same host)
+    "my-api-key",                  // API key for gRPC (leave empty if not used)
     30*time.Second,                // HTTP timeout
-    // optional: cache TTL untuk JWKS (default 5 menit)
+    // optional: JWKS cache TTL (default 5 minutes)
     // 10*time.Minute,
 )
-defer client.Close() // tutup koneksi gRPC saat selesai
+defer client.Close() // close gRPC connection when done
 ```
 
-### Opsi Tambahan
+### Additional Options
 
 ```go
-// Nonaktifkan TLS pada koneksi gRPC (hanya untuk development/local)
+// Disable TLS on gRPC connection (for development/local only)
 client.WithGRPCInsecure()
 ```
 
 ---
 
-## Contoh Penggunaan
+
+## Usage Examples
 
 ### Health Check
 
@@ -53,20 +57,21 @@ fmt.Println(resp.Message)
 
 ---
 
-### Login Web
+
+### Web Login
 
 ```go
 resp, err := client.WebLogin("user@example.com", "password123", authclient.PlatformNewWeb)
 if err != nil {
     if err.Error() == "invalid_credentials" {
-        log.Println("Email atau password salah")
+        log.Println("Email or password is incorrect")
     }
     log.Fatal(err)
 }
 
 if resp.IsRedirect() {
-    // Platform mismatch — user diarahkan ke platform lain
-    fmt.Println("Redirect ke:", resp.RedirectPlatform)
+    // Platform mismatch — user is redirected to another platform
+    fmt.Println("Redirect to:", resp.RedirectPlatform)
     fmt.Println("OTC Token:", *resp.OTCToken)
 } else {
     fmt.Println("Access Token:", resp.AccessToken)
@@ -76,13 +81,15 @@ if resp.IsRedirect() {
 
 ---
 
-### Login Mobile
+
+### Mobile Login
 
 ```go
-// Login dengan email
+
+// Login with email
 resp, err := client.MobileLogin("password123", "user@example.com", "", "")
 
-// Login dengan nomor telepon
+// Login with phone number
 resp, err := client.MobileLogin("password123", "", "81234567890", "62")
 
 if err != nil {
@@ -90,7 +97,7 @@ if err != nil {
 }
 fmt.Println("Identity Access Token:", resp.IdentityAccessToken)
 
-// Tukar identity token dengan company-scoped token
+// Exchange identity token for company-scoped token
 companyResp, err := client.MobileIssueCompanyToken(
     resp.IdentityAccessToken,
     "company-uuid",
@@ -105,13 +112,14 @@ fmt.Println("Access Token:", companyResp.AccessToken)
 
 ---
 
-### Verifikasi JWT
+
+### JWT Verification
 
 ```go
-// Token user biasa
+// Regular user token
 claims, err := client.VerifyAndParseClaims(accessToken)
 if err != nil {
-    log.Fatal("Token tidak valid:", err)
+    log.Fatal("Invalid token:", err)
 }
 fmt.Println("User ID:", claims.UserID)
 fmt.Println("Company ID:", claims.CompanyID)
@@ -119,15 +127,16 @@ fmt.Println("Role:", claims.Role)
 fmt.Println("Platform:", claims.Platform)
 fmt.Println("Token Type:", claims.TokenType)
 
-// Token S2S (service-to-service)
+// S2S (service-to-service) token
 s2sClaims, err := client.VerifyAndParseS2SClaims(s2sToken)
 if err != nil {
-    log.Fatal("S2S token tidak valid:", err)
+    log.Fatal("Invalid S2S token:", err)
 }
 fmt.Println("Service Name:", s2sClaims.ServiceName)
 ```
 
 ---
+
 
 ### Refresh Token
 
@@ -141,106 +150,113 @@ fmt.Println("New Access Token:", resp.AccessToken)
 
 ---
 
+
 ### One-Time-Code (OTC) — Cross-platform Navigation
 
 ```go
 // Generate OTC
 otcResp, err := client.GenerateOTCToken(accessToken, authclient.PlatformOldWeb, "", "")
-// Dengan company context (multicompany new_web):
+// With company context (multicompany new_web):
 // otcResp, err := client.GenerateOTCToken(accessToken, authclient.PlatformOldWeb, "company-id", "employee")
 
-// Exchange OTC untuk access token
+// Exchange OTC for access token
 exchangeResp, err := client.ExchangeOTCForToken(otcResp.OTCToken)
 fmt.Println("Access Token:", exchangeResp.AccessToken)
 ```
 
 ---
 
+
 ### Logout
 
 ```go
-// Logout sesi ini
+// Logout this session
 _, err := client.Logout(accessToken)
 
-// Logout semua perangkat
+// Logout all devices
 _, err = client.LogoutAllDevices(accessToken)
 ```
 
 ---
 
-### Informasi User
+
+### User Information
 
 ```go
 userInfo, err := client.GetUserInfo(accessToken)
-fmt.Println("Nama:", userInfo.Name)
+fmt.Println("Name:", userInfo.Name)
 
-// Daftar company user (mobile)
+// List of user's companies (mobile)
 companies, err := client.GetUserCompanies(accessToken)
 
-// Semua company (lintas platform)
+// All companies (cross-platform)
 allCompanies, err := client.GetUserAllCompanies(accessToken)
 
-// Company untuk web
+// Companies for web
 webCompanies, err := client.GetUserWebCompanies(accessToken)
 ```
 
 ---
 
-### Daftarkan Company Baru
+
+### Register a New Company
 
 ```go
 phone := "081234567890"
-resp, err := client.RegisterCompany(accessToken, "PT Contoh", "admin@contoh.com", &phone)
-// phone bisa nil jika tidak ada
+resp, err := client.RegisterCompany(accessToken, "PT Example", "admin@example.com", &phone)
+// phone can be nil if not provided
 ```
 
 ---
 
-### Manajemen User-Company
+
+### User-Company Management
 
 ```go
-// Tambah user ke company sebagai employee (butuh role admin/subadmin/owner)
+// Add user to company as employee (requires admin/subadmin/owner role)
 _, err := client.LinkUserToCompanyAsEmployee(accessToken, "company-uuid", "user-uuid")
 
-// Tambah user ke company sebagai subadmin (butuh role admin)
+// Add user to company as subadmin (requires admin role)
 _, err = client.LinkUserToCompanyAsSubAdmin(accessToken, "company-uuid", "user-uuid")
 
-// Tambah user ke company sebagai owner
+// Add user to company as owner
 _, err = client.LinkUserToCompanyAsOwner(accessToken, "company-uuid", "user-uuid")
 
-// Hapus user dari company (role employee)
+// Remove user from company (employee role)
 _, err = client.UnlinkUserFromCompanyAsEmployee(accessToken, "company-uuid", "user-uuid")
 ```
 
 ---
 
+
 ### OTP
 
 ```go
-// Request OTP (membutuhkan X-Company-ID)
+// Request OTP (requires X-Company-ID)
 _, err := client.OTPRequest(
     accessToken, "company-uuid",
     authclient.OTPVerifyTypeLogin,
     authclient.OTPVerifyModePhone,
 )
 
-// Verifikasi OTP
+// Verify OTP
 resp, err := client.OTPVerify(
     accessToken, "company-uuid", "123456",
     authclient.OTPVerifyTypeLogin,
     authclient.OTPVerifyModePhone,
 )
 
-// Verifikasi email
+// Email verification
 _, err = client.OTPRequestEmailVerification(accessToken)
 resp, err = client.OTPVerifyEmail(accessToken, "123456")
 
-// Verifikasi phone
+// Phone verification
 _, err = client.OTPRequestPhoneVerification(accessToken)
 resp, err = client.OTPVerifyPhone(accessToken, "123456")
 ```
 
 ---
+
 
 ### Service-to-Service (S2S)
 
@@ -255,19 +271,19 @@ _, err = client.S2SRequestEmailResetPassword(s2sToken, "user@example.com", "http
 // Reset password via OTP phone
 _, err = client.S2SRequestPhoneOTPResetPassword(s2sToken, "62", "81234567890")
 
-// Eksekusi reset password
+// Execute password reset
 _, err = client.S2SResetPassword(s2sToken, "email-reset-token", "", "newpassword123")
 
-// Register company + user admin sekaligus
+// Register company + admin user at once
 _, err = client.S2SRegisterCompanyAndUserAdmin(s2sToken, map[string]any{
-    "company_name": "PT Baru",
-    "email":        "admin@baru.com",
+    "company_name": "PT New",
+    "email":        "admin@new.com",
     "password":     "secret123",
 })
 
-// Register user saja
+// Register user only
 _, err = client.S2SRegisterUser(s2sToken, map[string]any{
-    "email":    "karyawan@baru.com",
+    "email":    "employee@new.com",
     "password": "secret123",
     "name":     "Budi",
 })
@@ -277,34 +293,37 @@ _, err = client.S2SRegisterUser(s2sToken, map[string]any{
 
 ## gRPC Client
 
-gRPC client digunakan untuk query internal antar service (server-to-server). Koneksi dibuat secara lazy (pertama kali method gRPC dipanggil) dan di-reuse untuk semua panggilan berikutnya.
 
-### Inisialisasi dengan gRPC
+gRPC client is used for internal queries between services (server-to-server). The connection is created lazily (on the first gRPC method call) and reused for all subsequent calls.
+
+
+### Initialization with gRPC
 
 ```go
 client := authclient.NewFioAuthClient(
     "http://localhost:8080",  // HTTP base URL
     "localhost:50051",        // gRPC server address
-    "my-s2s-api-key",         // API key (dikirim sebagai metadata "authorization")
+    "my-s2s-api-key",         // API key (sent as "authorization" metadata)
     30*time.Second,
 )
 
-// Untuk environment development (tanpa TLS):
+// For development environment (without TLS):
 client.WithGRPCInsecure()
 
-// Pastikan koneksi ditutup saat program selesai:
+// Make sure to close the connection when the program ends:
 defer client.Close()
 ```
 
-> **Produksi**: TLS diaktifkan secara default (TLS 1.2+).  
-> **Development/local**: Panggil `WithGRPCInsecure()` sebelum request gRPC pertama.  
-> **API key**: Dikirim sebagai metadata header `authorization` pada setiap panggilan gRPC. Kosongkan jika tidak dipakai.
+> **Production**: TLS is enabled by default (TLS 1.2+).  
+> **Development/local**: Call `WithGRPCInsecure()` before the first gRPC request.  
+> **API key**: Sent as `authorization` metadata header on every gRPC call. Leave empty if not used.
 
 ---
 
-### GrpcCheckUser — Cek keberadaan user
 
-Memeriksa apakah user dengan ID tertentu ada, dan mengembalikan data profil dasar jika ditemukan.
+### GrpcCheckUser — Check user existence
+
+Checks if a user with the given ID exists, and returns basic profile data if found.
 
 ```go
 ctx := context.Background()
@@ -315,7 +334,7 @@ if err != nil {
 }
 
 if result.Found {
-    fmt.Println("Nama:", result.User.Name)
+    fmt.Println("Name:", result.User.Name)
     fmt.Println("Email:", result.User.Email)
     fmt.Println("Status:", result.User.Status)
 } else {
@@ -323,29 +342,33 @@ if result.Found {
 }
 ```
 
-**Tipe kembalian `GrpcCheckUserResult`:**
 
-| Field   | Tipe            | Keterangan                        |
-|---------|-----------------|-----------------------------------|
-| `Found` | `bool`          | `true` jika user ditemukan        |
-| `User`  | `*GrpcUserBasic`| `nil` jika `Found` adalah `false` |
+**Return type `GrpcCheckUserResult`:**
 
-**Tipe `GrpcUserBasic`:**
+| Field   | Type             | Description                          |
+|---------|------------------|--------------------------------------|
+| `Found` | `bool`           | `true` if user is found              |
+| `User`  | `*GrpcUserBasic` | `nil` if `Found` is `false`          |
 
-| Field       | Tipe     |
-|-------------|----------|
-| `ID`        | `string` |
-| `Name`      | `string` |
-| `Email`     | `string` |
-| `PhoneCode` | `string` |
-| `Phone`     | `string` |
-| `Status`    | `string` |
+**Type `GrpcUserBasic`:**
+
+| Field             | Type    | Description                                         |
+|-------------------|---------|-----------------------------------------------------|
+| `ID`              | `string`|                                                     |
+| `Name`            | `string`|                                                     |
+| `Email`           | `string`|                                                     |
+| `PhoneCode`       | `string`|                                                     |
+| `Phone`           | `string`|                                                     |
+| `Status`          | `string`|                                                     |
+| `EmailVerifiedAt` | `int64` | Unix timestamp; `0` if not verified                 |
+| `PhoneVerifiedAt` | `int64` | Unix timestamp; `0` if not verified                 |
 
 ---
 
-### GrpcCheckUserCompanyRelations — Cek semua relasi user di company
 
-Mengembalikan semua role yang dimiliki `userID` di dalam `companyID`.
+### GrpcCheckUserCompanyRelations — Check all user relations in a company
+
+Returns all roles owned by `userID` in `companyID`.
 
 ```go
 result, err := client.GrpcCheckUserCompanyRelations(ctx, "user-uuid", "company-uuid")
@@ -358,22 +381,24 @@ if result.Found {
         fmt.Println("Role:", rel.Role, "| Since:", rel.CreatedAt)
     }
 } else {
-    fmt.Println("User tidak terdaftar di company ini")
+    fmt.Println("User is not registered in this company")
 }
 ```
 
-**Tipe kembalian `GrpcCheckUserCompanyRelationsResult`:**
 
-| Field       | Tipe                        | Keterangan                                     |
-|-------------|-----------------------------|------------------------------------------------|
-| `Found`     | `bool`                      | `false` jika user tidak punya relasi di company |
-| `Relations` | `[]GrpcUserCompanyRelation` | Daftar relasi (bisa lebih dari satu role)       |
+**Return type `GrpcCheckUserCompanyRelationsResult`:**
+
+| Field       | Type                        | Description                                     |
+|-------------|-----------------------------|-------------------------------------------------|
+| `Found`     | `bool`                      | `false` if user has no relation in the company  |
+| `Relations` | `[]GrpcUserCompanyRelation` | List of relations (can have more than one role) |
 
 ---
 
-### GrpcCheckUserCompanyRole — Cek role spesifik user di company
 
-Memeriksa apakah `userID` memiliki role tertentu di `companyID`.
+### GrpcCheckUserCompanyRole — Check specific user role in a company
+
+Checks if `userID` has a specific role in `companyID`.
 
 ```go
 result, err := client.GrpcCheckUserCompanyRole(ctx, "user-uuid", "company-uuid", authclient.RoleEmployee)
@@ -382,26 +407,28 @@ if err != nil {
 }
 
 if result.Found {
-    fmt.Println("User adalah employee sejak:", result.Relation.CreatedAt)
+    fmt.Println("User is an employee since:", result.Relation.CreatedAt)
 } else {
-    fmt.Println("User bukan employee di company ini")
+    fmt.Println("User is not an employee in this company")
 }
 ```
 
-**Nilai `Role` yang valid:** `RoleEmployee`, `RoleOwner`, `RoleSubadmin`, `RoleAdmin`
 
-**Tipe kembalian `GrpcCheckUserCompanyRoleResult`:**
+**Valid `Role` values:** `RoleEmployee`, `RoleOwner`, `RoleSubadmin`, `RoleAdmin`
 
-| Field      | Tipe                      | Keterangan                           |
-|------------|---------------------------|--------------------------------------|
-| `Found`    | `bool`                    | `true` jika user punya role tersebut |
-| `Relation` | `*GrpcUserCompanyRelation`| `nil` jika `Found` adalah `false`    |
+**Return type `GrpcCheckUserCompanyRoleResult`:**
+
+| Field      | Type                      | Description                           |
+|------------|---------------------------|---------------------------------------|
+| `Found`    | `bool`                    | `true` if user has the role           |
+| `Relation` | `*GrpcUserCompanyRelation`| `nil` if `Found` is `false`           |
 
 ---
 
-### GrpcGetUserAllRelations — Ambil semua relasi user lintas company
 
-Mengembalikan semua relasi company yang dimiliki `userID` di semua company.
+### GrpcGetUserAllRelations — Get all user relations across companies
+
+Returns all company relations owned by `userID` in all companies.
 
 ```go
 result, err := client.GrpcGetUserAllRelations(ctx, "user-uuid")
@@ -416,31 +443,96 @@ if result.Found {
 }
 ```
 
-**Tipe kembalian `GrpcGetUserAllRelationsResult`:**
 
-| Field       | Tipe                        | Keterangan                               |
-|-------------|-----------------------------|------------------------------------------|
-| `Found`     | `bool`                      | `false` jika user tidak punya relasi     |
-| `Relations` | `[]GrpcUserCompanyRelation` | Semua relasi user di semua company        |
+**Return type `GrpcGetUserAllRelationsResult`:**
 
----
-
-**Tipe `GrpcUserCompanyRelation`:**
-
-| Field       | Tipe        | Keterangan                          |
-|-------------|-------------|-------------------------------------|
-| `UserID`    | `string`    |                                     |
-| `CompanyID` | `string`    |                                     |
-| `Role`      | `Role`      | Salah satu konstanta `Role`         |
-| `CreatedAt` | `time.Time` | Dikonversi dari unix timestamp      |
+| Field       | Type                        | Description                               |
+|-------------|-----------------------------|-------------------------------------------|
+| `Found`     | `bool`                      | `false` if user has no relations          |
+| `Relations` | `[]GrpcUserCompanyRelation` | All user relations in all companies       |
 
 ---
 
-## Konstanta
 
-| Tipe                | Nilai                                                                                      |
+**Type `GrpcUserCompanyRelation`:**
+
+| Field       | Type        | Description                          |
+|-------------|-------------|--------------------------------------|
+| `UserID`    | `string`    |                                      |
+| `CompanyID` | `string`    |                                      |
+| `Role`      | `Role`      | One of the `Role` constants          |
+| `CreatedAt` | `time.Time` | Converted from unix timestamp        |
+
+---
+
+
+### GrpcGetCompanyWithEndpoint — Get company info with endpoint
+
+Returns company and related endpoint data based on `companyID`.
+
+```go
+result, err := client.GrpcGetCompanyWithEndpoint(ctx, "company-uuid")
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.Found {
+    fmt.Println("Company:", result.Company.Name)
+    fmt.Println("Email:", result.Company.Email)
+    fmt.Println("Device Policy:", result.Company.DeviceLoginPolicy)
+    fmt.Println("Max Devices:", result.Company.MaxDevices)
+
+    if result.Endpoint != nil {
+        fmt.Println("Backend Mode:", result.Endpoint.BackendMode)
+        fmt.Println("Base URL:", result.Endpoint.BaseURL)
+        fmt.Println("DB Driver:", result.Endpoint.DBDriver) // kosong jika tidak diset
+        fmt.Println("DB DSN:", result.Endpoint.DBDSN)       // kosong jika tidak diset
+    }
+} else {
+    fmt.Println("Company not found")
+}
+```
+
+
+**Return type `GrpcGetCompanyWithEndpointResult`:**
+
+| Field      | Type                | Description                                 |
+|------------|---------------------|---------------------------------------------|
+| `Found`    | `bool`              | `false` if company not found                |
+| `Company`  | `*GrpcCompanyInfo`  | `nil` if `Found` is `false`                 |
+| `Endpoint` | `*GrpcEndpointInfo` | `nil` if company has no endpoint            |
+
+**Type `GrpcCompanyInfo`:**
+
+| Field               | Type     | Description                                 |
+|---------------------|----------|---------------------------------------------|
+| `ID`                | `string` |                                             |
+| `Name`              | `string` |                                             |
+| `Email`             | `string` |                                             |
+| `Phone`             | `string` | Empty if not set                            |
+| `DueDate`           | `int64`  | Unix timestamp; `0` if not set              |
+| `EndpointID`        | `string` |                                             |
+| `DeviceLoginPolicy` | `string` | `fixed_device` or `trusted_device_rotate`   |
+| `MaxDevices`        | `int32`  |                                             |
+
+**Type `GrpcEndpointInfo`:**
+
+| Field         | Type     | Description                        |
+|---------------|----------|------------------------------------|
+| `ID`          | `string` |                                    |
+| `BackendMode` | `string` | `new_web` or `old_web`             |
+| `BaseURL`     | `string` |                                    |
+| `DBDriver`    | `string` | Empty if not set                   |
+| `DBDSN`       | `string` | Empty if not set                   |
+
+---
+
+
+## Constants
+
+| Type                | Values                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------|
-| `Platform`          | `PlatformNewWeb`, `PlatformOldWeb`, `PlatformMobile`, `PlatformPayment`                   |
+| `Platform`          | `PlatformNewWeb`, `PlatformOldWeb`, `PlatformMobile`, `PlatformPayment`                    |
 | `TokenType`         | `TokenTypeAccess`, `TokenTypeRefresh`, `TokenTypeIdentityAccess`, `TokenTypeIdentityRefresh`, `TokenTypeOTC`, `TokenTypeS2SAccess` |
 | `OTPVerifyType`     | `OTPVerifyTypeRegister`, `OTPVerifyTypeLogin`, `OTPVerifyTypeResetPassword`, `OTPVerifyTypeEmail`, `OTPVerifyTypePhone`, `OTPVerifyTypeChangeDevice`, `OTPVerifyTypeOther` |
 | `OTPVerifyMode`     | `OTPVerifyModePhone`, `OTPVerifyModeEmail`                                                 |
@@ -449,11 +541,12 @@ if result.Found {
 
 ---
 
-## Catatan
 
-- JWKS di-cache secara otomatis (default 5 menit). Key rotation ditangani dengan invalidasi cache dan retry otomatis.
-- Error HTTP >= 400 dikembalikan sebagai `error` dengan pesan dari server.
-- `WebLogin` mengembalikan `"invalid_credentials"` sebagai string error untuk kemudahan assertion.
-- Fungsi yang membutuhkan company context (`OTPRequest`, `LinkUserToCompany`, dll.) akan menyertakan header `X-Company-ID` secara otomatis.
-- Koneksi gRPC dibuat secara lazy dan di-reuse; panggil `Close()` saat client tidak lagi dibutuhkan.
-- `WithGRPCInsecure()` harus dipanggil **sebelum** request gRPC pertama karena koneksi hanya dibuat sekali.
+## Notes
+
+- JWKS is automatically cached (default 5 minutes). Key rotation is handled with cache invalidation and automatic retry.
+- HTTP errors (>= 400) are returned as `error` with the server message.
+- `WebLogin` returns `"invalid_credentials"` as a string error for easier assertion.
+- Functions requiring company context (`OTPRequest`, `LinkUserToCompany`, etc.) will automatically include the `X-Company-ID` header.
+- gRPC connection is created lazily and reused; call `Close()` when the client is no longer needed.
+- `WithGRPCInsecure()` must be called **before** the first gRPC request because the connection is created only once.

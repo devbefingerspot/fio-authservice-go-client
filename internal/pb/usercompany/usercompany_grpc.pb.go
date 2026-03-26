@@ -22,6 +22,7 @@ const (
 	UserCompanyService_CheckUserCompanyRelations_FullMethodName = "/usercompany.UserCompanyService/CheckUserCompanyRelations"
 	UserCompanyService_CheckUserCompanyRole_FullMethodName      = "/usercompany.UserCompanyService/CheckUserCompanyRole"
 	UserCompanyService_GetUserAllRelations_FullMethodName       = "/usercompany.UserCompanyService/GetUserAllRelations"
+	UserCompanyService_GetCompanyWithEndpoint_FullMethodName    = "/usercompany.UserCompanyService/GetCompanyWithEndpoint"
 )
 
 // UserCompanyServiceClient is the client API for UserCompanyService service.
@@ -30,6 +31,7 @@ type UserCompanyServiceClient interface {
 	CheckUserCompanyRelations(ctx context.Context, in *CheckUserCompanyRelationsRequest, opts ...grpc.CallOption) (*CheckUserCompanyRelationsResponse, error)
 	CheckUserCompanyRole(ctx context.Context, in *CheckUserCompanyRoleRequest, opts ...grpc.CallOption) (*CheckUserCompanyRoleResponse, error)
 	GetUserAllRelations(ctx context.Context, in *GetUserAllRelationsRequest, opts ...grpc.CallOption) (*GetUserAllRelationsResponse, error)
+	GetCompanyWithEndpoint(ctx context.Context, in *GetCompanyWithEndpointRequest, opts ...grpc.CallOption) (*GetCompanyWithEndpointResponse, error)
 }
 
 type userCompanyServiceClient struct {
@@ -80,6 +82,16 @@ func (c *userCompanyServiceClient) GetUserAllRelations(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *userCompanyServiceClient) GetCompanyWithEndpoint(ctx context.Context, in *GetCompanyWithEndpointRequest, opts ...grpc.CallOption) (*GetCompanyWithEndpointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCompanyWithEndpointResponse)
+	err := c.cc.Invoke(ctx, UserCompanyService_GetCompanyWithEndpoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server-side stubs are included for completeness but are not used by the client.
 
 type UserCompanyServiceServer interface {
@@ -87,6 +99,7 @@ type UserCompanyServiceServer interface {
 	CheckUserCompanyRelations(context.Context, *CheckUserCompanyRelationsRequest) (*CheckUserCompanyRelationsResponse, error)
 	CheckUserCompanyRole(context.Context, *CheckUserCompanyRoleRequest) (*CheckUserCompanyRoleResponse, error)
 	GetUserAllRelations(context.Context, *GetUserAllRelationsRequest) (*GetUserAllRelationsResponse, error)
+	GetCompanyWithEndpoint(context.Context, *GetCompanyWithEndpointRequest) (*GetCompanyWithEndpointResponse, error)
 	mustEmbedUnimplementedUserCompanyServiceServer()
 }
 
@@ -103,5 +116,8 @@ func (UnimplementedUserCompanyServiceServer) CheckUserCompanyRole(context.Contex
 }
 func (UnimplementedUserCompanyServiceServer) GetUserAllRelations(context.Context, *GetUserAllRelationsRequest) (*GetUserAllRelationsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserAllRelations not implemented")
+}
+func (UnimplementedUserCompanyServiceServer) GetCompanyWithEndpoint(context.Context, *GetCompanyWithEndpointRequest) (*GetCompanyWithEndpointResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCompanyWithEndpoint not implemented")
 }
 func (UnimplementedUserCompanyServiceServer) mustEmbedUnimplementedUserCompanyServiceServer() {}

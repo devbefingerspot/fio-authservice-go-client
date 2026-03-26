@@ -8,12 +8,14 @@ import "time"
 
 // GrpcUserBasic holds basic user data returned by the CheckUser RPC.
 type GrpcUserBasic struct {
-	ID        string
-	Name      string
-	Email     string
-	PhoneCode string
-	Phone     string
-	Status    string
+	ID              string
+	Name            string
+	Email           string
+	PhoneCode       string
+	Phone           string
+	Status          string
+	EmailVerifiedAt int64 // unix timestamp, 0 when not verified
+	PhoneVerifiedAt int64 // unix timestamp, 0 when not verified
 }
 
 // GrpcUserCompanyRelation represents a single user↔company relationship row.
@@ -46,4 +48,32 @@ type GrpcCheckUserCompanyRoleResult struct {
 type GrpcGetUserAllRelationsResult struct {
 	Found     bool
 	Relations []GrpcUserCompanyRelation
+}
+
+// GrpcCompanyInfo holds company data returned by GetCompanyWithEndpoint.
+type GrpcCompanyInfo struct {
+	ID                string
+	Name              string
+	Email             string
+	Phone             string // empty when not set
+	DueDate           int64  // unix timestamp, 0 when not set
+	EndpointID        string
+	DeviceLoginPolicy string
+	MaxDevices        int32
+}
+
+// GrpcEndpointInfo holds endpoint data returned by GetCompanyWithEndpoint.
+type GrpcEndpointInfo struct {
+	ID          string
+	BackendMode string
+	BaseURL     string
+	DBDriver    string // empty when not set
+	DBDSN       string // empty when not set
+}
+
+// GrpcGetCompanyWithEndpointResult is returned by GrpcGetCompanyWithEndpoint.
+type GrpcGetCompanyWithEndpointResult struct {
+	Found    bool
+	Company  *GrpcCompanyInfo  // nil when Found is false
+	Endpoint *GrpcEndpointInfo // nil when company has no endpoint
 }

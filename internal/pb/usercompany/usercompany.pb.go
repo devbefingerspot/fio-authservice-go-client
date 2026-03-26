@@ -22,15 +22,17 @@ const (
 )
 
 type UserBasic struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	PhoneCode     string                 `protobuf:"bytes,4,opt,name=phone_code,json=phoneCode,proto3" json:"phone_code,omitempty"`
-	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Email           string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	PhoneCode       string                 `protobuf:"bytes,4,opt,name=phone_code,json=phoneCode,proto3" json:"phone_code,omitempty"`
+	Phone           string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
+	Status          string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	EmailVerifiedAt int64                  `protobuf:"varint,7,opt,name=email_verified_at,json=emailVerifiedAt,proto3" json:"email_verified_at,omitempty"`
+	PhoneVerifiedAt int64                  `protobuf:"varint,8,opt,name=phone_verified_at,json=phoneVerifiedAt,proto3" json:"phone_verified_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *UserBasic) Reset() {
@@ -102,6 +104,20 @@ func (x *UserBasic) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *UserBasic) GetEmailVerifiedAt() int64 {
+	if x != nil {
+		return x.EmailVerifiedAt
+	}
+	return 0
+}
+
+func (x *UserBasic) GetPhoneVerifiedAt() int64 {
+	if x != nil {
+		return x.PhoneVerifiedAt
+	}
+	return 0
 }
 
 type UserCompanyRelation struct {
@@ -571,11 +587,287 @@ func (x *GetUserAllRelationsResponse) GetRelations() []*UserCompanyRelation {
 	return nil
 }
 
+type CompanyInfo struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Email             string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Phone             string                 `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	DueDate           int64                  `protobuf:"varint,5,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	EndpointId        string                 `protobuf:"bytes,6,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
+	DeviceLoginPolicy string                 `protobuf:"bytes,7,opt,name=device_login_policy,json=deviceLoginPolicy,proto3" json:"device_login_policy,omitempty"`
+	MaxDevices        int32                  `protobuf:"varint,8,opt,name=max_devices,json=maxDevices,proto3" json:"max_devices,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *CompanyInfo) Reset() {
+	*x = CompanyInfo{}
+	mi := &file_usercompany_usercompany_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompanyInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompanyInfo) ProtoMessage() {}
+
+func (x *CompanyInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_usercompany_usercompany_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*CompanyInfo) Descriptor() ([]byte, []int) {
+	return file_usercompany_usercompany_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CompanyInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetDueDate() int64 {
+	if x != nil {
+		return x.DueDate
+	}
+	return 0
+}
+
+func (x *CompanyInfo) GetEndpointId() string {
+	if x != nil {
+		return x.EndpointId
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetDeviceLoginPolicy() string {
+	if x != nil {
+		return x.DeviceLoginPolicy
+	}
+	return ""
+}
+
+func (x *CompanyInfo) GetMaxDevices() int32 {
+	if x != nil {
+		return x.MaxDevices
+	}
+	return 0
+}
+
+type EndpointInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	BackendMode   string                 `protobuf:"bytes,2,opt,name=backend_mode,json=backendMode,proto3" json:"backend_mode,omitempty"`
+	BaseUrl       string                 `protobuf:"bytes,3,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
+	DbDriver      string                 `protobuf:"bytes,4,opt,name=db_driver,json=dbDriver,proto3" json:"db_driver,omitempty"`
+	DbDsn         string                 `protobuf:"bytes,5,opt,name=db_dsn,json=dbDsn,proto3" json:"db_dsn,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EndpointInfo) Reset() {
+	*x = EndpointInfo{}
+	mi := &file_usercompany_usercompany_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EndpointInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EndpointInfo) ProtoMessage() {}
+
+func (x *EndpointInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_usercompany_usercompany_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*EndpointInfo) Descriptor() ([]byte, []int) {
+	return file_usercompany_usercompany_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *EndpointInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EndpointInfo) GetBackendMode() string {
+	if x != nil {
+		return x.BackendMode
+	}
+	return ""
+}
+
+func (x *EndpointInfo) GetBaseUrl() string {
+	if x != nil {
+		return x.BaseUrl
+	}
+	return ""
+}
+
+func (x *EndpointInfo) GetDbDriver() string {
+	if x != nil {
+		return x.DbDriver
+	}
+	return ""
+}
+
+func (x *EndpointInfo) GetDbDsn() string {
+	if x != nil {
+		return x.DbDsn
+	}
+	return ""
+}
+
+type GetCompanyWithEndpointRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CompanyId     string                 `protobuf:"bytes,1,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCompanyWithEndpointRequest) Reset() {
+	*x = GetCompanyWithEndpointRequest{}
+	mi := &file_usercompany_usercompany_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCompanyWithEndpointRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCompanyWithEndpointRequest) ProtoMessage() {}
+
+func (x *GetCompanyWithEndpointRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usercompany_usercompany_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*GetCompanyWithEndpointRequest) Descriptor() ([]byte, []int) {
+	return file_usercompany_usercompany_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetCompanyWithEndpointRequest) GetCompanyId() string {
+	if x != nil {
+		return x.CompanyId
+	}
+	return ""
+}
+
+type GetCompanyWithEndpointResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Found         bool                   `protobuf:"varint,1,opt,name=found,proto3" json:"found,omitempty"`
+	Company       *CompanyInfo           `protobuf:"bytes,2,opt,name=company,proto3" json:"company,omitempty"`
+	Endpoint      *EndpointInfo          `protobuf:"bytes,3,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCompanyWithEndpointResponse) Reset() {
+	*x = GetCompanyWithEndpointResponse{}
+	mi := &file_usercompany_usercompany_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCompanyWithEndpointResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCompanyWithEndpointResponse) ProtoMessage() {}
+
+func (x *GetCompanyWithEndpointResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usercompany_usercompany_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (*GetCompanyWithEndpointResponse) Descriptor() ([]byte, []int) {
+	return file_usercompany_usercompany_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetCompanyWithEndpointResponse) GetFound() bool {
+	if x != nil {
+		return x.Found
+	}
+	return false
+}
+
+func (x *GetCompanyWithEndpointResponse) GetCompany() *CompanyInfo {
+	if x != nil {
+		return x.Company
+	}
+	return nil
+}
+
+func (x *GetCompanyWithEndpointResponse) GetEndpoint() *EndpointInfo {
+	if x != nil {
+		return x.Endpoint
+	}
+	return nil
+}
+
 var File_usercompany_usercompany_proto protoreflect.FileDescriptor
 
 const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\n" +
-	"\x1dusercompany/usercompany.proto\x12\vusercompany\"\x92\x01\n" +
+	"\x1dusercompany/usercompany.proto\x12\vusercompany\"\xea\x01\n" +
 	"\tUserBasic\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
@@ -583,7 +875,9 @@ const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\n" +
 	"phone_code\x18\x04 \x01(\tR\tphoneCode\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\x80\x01\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12*\n" +
+	"\x11email_verified_at\x18\a \x01(\x03R\x0femailVerifiedAt\x12*\n" +
+	"\x11phone_verified_at\x18\b \x01(\x03R\x0fphoneVerifiedAt\"\x80\x01\n" +
 	"\x13UserCompanyRelation\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
@@ -615,12 +909,37 @@ const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"s\n" +
 	"\x1bGetUserAllRelationsResponse\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x12>\n" +
-	"\trelations\x18\x02 \x03(\v2 .usercompany.UserCompanyRelationR\trelations2\xb3\x03\n" +
+	"\trelations\x18\x02 \x03(\v2 .usercompany.UserCompanyRelationR\trelations\"\xea\x01\n" +
+	"\vCompanyInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x19\n" +
+	"\bdue_date\x18\x05 \x01(\x03R\adueDate\x12\x1f\n" +
+	"\vendpoint_id\x18\x06 \x01(\tR\n" +
+	"endpointId\x12.\n" +
+	"\x13device_login_policy\x18\a \x01(\tR\x11deviceLoginPolicy\x12\x1f\n" +
+	"\vmax_devices\x18\b \x01(\x05R\n" +
+	"maxDevices\"\x90\x01\n" +
+	"\fEndpointInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fbackend_mode\x18\x02 \x01(\tR\vbackendMode\x12\x19\n" +
+	"\bbase_url\x18\x03 \x01(\tR\abaseUrl\x12\x1b\n" +
+	"\tdb_driver\x18\x04 \x01(\tR\bdbDriver\x12\x15\n" +
+	"\x06db_dsn\x18\x05 \x01(\tR\x05dbDsn\">\n" +
+	"\x1dGetCompanyWithEndpointRequest\x12\x1d\n" +
+	"\n" +
+	"company_id\x18\x01 \x01(\tR\tcompanyId\"\xa1\x01\n" +
+	"\x1eGetCompanyWithEndpointResponse\x12\x14\n" +
+	"\x05found\x18\x01 \x01(\bR\x05found\x122\n" +
+	"\acompany\x18\x02 \x01(\v2\x18.usercompany.CompanyInfoR\acompany\x125\n" +
+	"\bendpoint\x18\x03 \x01(\v2\x19.usercompany.EndpointInfoR\bendpoint2\xa6\x04\n" +
 	"\x12UserCompanyService\x12J\n" +
 	"\tCheckUser\x12\x1d.usercompany.CheckUserRequest\x1a\x1e.usercompany.CheckUserResponse\x12z\n" +
 	"\x19CheckUserCompanyRelations\x12-.usercompany.CheckUserCompanyRelationsRequest\x1a..usercompany.CheckUserCompanyRelationsResponse\x12k\n" +
 	"\x14CheckUserCompanyRole\x12(.usercompany.CheckUserCompanyRoleRequest\x1a).usercompany.CheckUserCompanyRoleResponse\x12h\n" +
-	"\x13GetUserAllRelations\x12'.usercompany.GetUserAllRelationsRequest\x1a(.usercompany.GetUserAllRelationsResponseB/Z-fio-auth-service/internal/grpc/pb/usercompanyb\x06proto3"
+	"\x13GetUserAllRelations\x12'.usercompany.GetUserAllRelationsRequest\x1a(.usercompany.GetUserAllRelationsResponse\x12q\n" +
+	"\x16GetCompanyWithEndpoint\x12*.usercompany.GetCompanyWithEndpointRequest\x1a+.usercompany.GetCompanyWithEndpointResponseB/Z-fio-auth-service/internal/grpc/pb/usercompanyb\x06proto3"
 
 var (
 	file_usercompany_usercompany_proto_rawDescOnce sync.Once
@@ -634,7 +953,7 @@ func file_usercompany_usercompany_proto_rawDescGZIP() []byte {
 	return file_usercompany_usercompany_proto_rawDescData
 }
 
-var file_usercompany_usercompany_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_usercompany_usercompany_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_usercompany_usercompany_proto_goTypes = []any{
 	(*UserBasic)(nil),                         // 0: usercompany.UserBasic
 	(*UserCompanyRelation)(nil),               // 1: usercompany.UserCompanyRelation
@@ -646,25 +965,33 @@ var file_usercompany_usercompany_proto_goTypes = []any{
 	(*CheckUserCompanyRoleResponse)(nil),      // 7: usercompany.CheckUserCompanyRoleResponse
 	(*GetUserAllRelationsRequest)(nil),        // 8: usercompany.GetUserAllRelationsRequest
 	(*GetUserAllRelationsResponse)(nil),       // 9: usercompany.GetUserAllRelationsResponse
+	(*CompanyInfo)(nil),                       // 10: usercompany.CompanyInfo
+	(*EndpointInfo)(nil),                      // 11: usercompany.EndpointInfo
+	(*GetCompanyWithEndpointRequest)(nil),     // 12: usercompany.GetCompanyWithEndpointRequest
+	(*GetCompanyWithEndpointResponse)(nil),    // 13: usercompany.GetCompanyWithEndpointResponse
 }
 var file_usercompany_usercompany_proto_depIdxs = []int32{
-	0, // 0: usercompany.CheckUserResponse.user:type_name -> usercompany.UserBasic
-	1, // 1: usercompany.CheckUserCompanyRelationsResponse.relations:type_name -> usercompany.UserCompanyRelation
-	1, // 2: usercompany.CheckUserCompanyRoleResponse.relation:type_name -> usercompany.UserCompanyRelation
-	1, // 3: usercompany.GetUserAllRelationsResponse.relations:type_name -> usercompany.UserCompanyRelation
-	2, // 4: usercompany.UserCompanyService.CheckUser:input_type -> usercompany.CheckUserRequest
-	4, // 5: usercompany.UserCompanyService.CheckUserCompanyRelations:input_type -> usercompany.CheckUserCompanyRelationsRequest
-	6, // 6: usercompany.UserCompanyService.CheckUserCompanyRole:input_type -> usercompany.CheckUserCompanyRoleRequest
-	8, // 7: usercompany.UserCompanyService.GetUserAllRelations:input_type -> usercompany.GetUserAllRelationsRequest
-	3, // 8: usercompany.UserCompanyService.CheckUser:output_type -> usercompany.CheckUserResponse
-	5, // 9: usercompany.UserCompanyService.CheckUserCompanyRelations:output_type -> usercompany.CheckUserCompanyRelationsResponse
-	7, // 10: usercompany.UserCompanyService.CheckUserCompanyRole:output_type -> usercompany.CheckUserCompanyRoleResponse
-	9, // 11: usercompany.UserCompanyService.GetUserAllRelations:output_type -> usercompany.GetUserAllRelationsResponse
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0,  // 0: usercompany.CheckUserResponse.user:type_name -> usercompany.UserBasic
+	1,  // 1: usercompany.CheckUserCompanyRelationsResponse.relations:type_name -> usercompany.UserCompanyRelation
+	1,  // 2: usercompany.CheckUserCompanyRoleResponse.relation:type_name -> usercompany.UserCompanyRelation
+	1,  // 3: usercompany.GetUserAllRelationsResponse.relations:type_name -> usercompany.UserCompanyRelation
+	10, // 4: usercompany.GetCompanyWithEndpointResponse.company:type_name -> usercompany.CompanyInfo
+	11, // 5: usercompany.GetCompanyWithEndpointResponse.endpoint:type_name -> usercompany.EndpointInfo
+	2,  // 6: usercompany.UserCompanyService.CheckUser:input_type -> usercompany.CheckUserRequest
+	4,  // 7: usercompany.UserCompanyService.CheckUserCompanyRelations:input_type -> usercompany.CheckUserCompanyRelationsRequest
+	6,  // 8: usercompany.UserCompanyService.CheckUserCompanyRole:input_type -> usercompany.CheckUserCompanyRoleRequest
+	8,  // 9: usercompany.UserCompanyService.GetUserAllRelations:input_type -> usercompany.GetUserAllRelationsRequest
+	12, // 10: usercompany.UserCompanyService.GetCompanyWithEndpoint:input_type -> usercompany.GetCompanyWithEndpointRequest
+	3,  // 11: usercompany.UserCompanyService.CheckUser:output_type -> usercompany.CheckUserResponse
+	5,  // 12: usercompany.UserCompanyService.CheckUserCompanyRelations:output_type -> usercompany.CheckUserCompanyRelationsResponse
+	7,  // 13: usercompany.UserCompanyService.CheckUserCompanyRole:output_type -> usercompany.CheckUserCompanyRoleResponse
+	9,  // 14: usercompany.UserCompanyService.GetUserAllRelations:output_type -> usercompany.GetUserAllRelationsResponse
+	13, // 15: usercompany.UserCompanyService.GetCompanyWithEndpoint:output_type -> usercompany.GetCompanyWithEndpointResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_usercompany_usercompany_proto_init() }
@@ -678,7 +1005,7 @@ func file_usercompany_usercompany_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usercompany_usercompany_proto_rawDesc), len(file_usercompany_usercompany_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
