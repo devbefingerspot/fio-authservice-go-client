@@ -19,6 +19,7 @@ go get github.com/devbefingerspot/fio-authservice-go-client
 
 ## Client Initialization
 
+
 ```go
 import authclient "github.com/devbefingerspot/fio-authservice-go-client"
 
@@ -26,12 +27,15 @@ client := authclient.NewFioAuthClient(
     "http://localhost:8080",       // base URL of auth service (HTTP)
     "auth-grpc.example.com:50051", // gRPC server base URL (leave empty to use the same host)
     "my-api-key",                  // API key for gRPC (leave empty if not used)
-    30*time.Second,                // HTTP timeout
+    "my-s2s-key",                  // S2S pre-shared key (required for S2S token)
+    30*time.Second,                 // HTTP timeout
     // optional: JWKS cache TTL (default 5 minutes)
     // 10*time.Minute,
 )
 defer client.Close() // close gRPC connection when done
 ```
+
+> **Note:** `my-s2s-key` harus sama dengan nilai `AUTH_S2S_KEY` di server auth-service.
 
 ### Additional Options
 
@@ -261,7 +265,7 @@ resp, err = client.OTPVerifyPhone(accessToken, "123456")
 ### Service-to-Service (S2S)
 
 ```go
-// Issue S2S token
+// Issue S2S token (requires s2sKey set in client constructor)
 s2sResp, err := client.S2SIssueToken("my-service")
 s2sToken := s2sResp.AccessToken
 
@@ -288,6 +292,12 @@ _, err = client.S2SRegisterUser(s2sToken, map[string]any{
     "name":     "Budi",
 })
 ```
+
+> **S2S Security:**
+>
+> - Untuk generate S2S token, client harus mengisi parameter `s2sKey` pada constructor `NewFioAuthClient`.
+> - Library otomatis mengirim header `X-S2S-Authorization` saat request S2S token.
+> - Jika key salah atau tidak diisi, request akan gagal (401 Unauthorized).
 
 ---
 

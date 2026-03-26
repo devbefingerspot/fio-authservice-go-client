@@ -29,6 +29,7 @@ type FioAuthClient struct {
 	grpcBaseURL  string
 	grpcAPIKey   string
 	grpcInsecure bool // true → plaintext; false → TLS (default)
+	s2sKey       string
 	httpClient   *http.Client
 	cache        *gocache.Cache
 
@@ -45,9 +46,10 @@ type FioAuthClient struct {
 //     Pass an empty string to use the same host as baseURL.
 //   - grpcAPIKey  : API key sent as the "x-api-key" metadata on every gRPC call.
 //     Pass an empty string to disable API key authentication.
+//   - s2sKey      : pre-shared key sent as X-S2S-Authorization when issuing S2S tokens.
 //   - timeout     : HTTP timeout (e.g. 30*time.Second)
 //   - cacheTTL    : optional JWKS cache TTL; defaults to 5 minutes if omitted or <= 0
-func NewFioAuthClient(baseURL, grpcBaseURL, grpcAPIKey string, timeout time.Duration, cacheTTL ...time.Duration) *FioAuthClient {
+func NewFioAuthClient(baseURL, grpcBaseURL, grpcAPIKey, s2sKey string, timeout time.Duration, cacheTTL ...time.Duration) *FioAuthClient {
 	ttl := 5 * time.Minute
 	if len(cacheTTL) > 0 && cacheTTL[0] > 0 {
 		ttl = cacheTTL[0]
@@ -59,6 +61,7 @@ func NewFioAuthClient(baseURL, grpcBaseURL, grpcAPIKey string, timeout time.Dura
 		baseURL:     strings.TrimRight(baseURL, "/"),
 		grpcBaseURL: strings.TrimRight(grpcBaseURL, "/"),
 		grpcAPIKey:  grpcAPIKey,
+		s2sKey:      s2sKey,
 		httpClient:  &http.Client{Timeout: timeout},
 		cache:       gocache.New(ttl, ttl*2),
 	}
@@ -122,6 +125,11 @@ func (c *FioAuthClient) doJSON(method, path string, body any, headers map[string
 // bearerHeader returns an Authorization: Bearer header map.
 func bearerHeader(token string) map[string]string {
 	return map[string]string{"Authorization": "Bearer " + token}
+}
+
+// s2sKeyHeader returns an X-S2S-Authorization header map.
+func s2sKeyHeader(key string) map[string]string {
+	return map[string]string{"X-S2S-Authorization": key}
 }
 
 // WithGRPCInsecure disables TLS for the gRPC connection and uses plaintext

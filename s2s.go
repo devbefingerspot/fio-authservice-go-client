@@ -5,11 +5,12 @@ import "net/http"
 // S2SIssueToken — POST /api/v1/s2s/token
 //
 // Issues a service-to-service JWT for the given service name.
+// Sends the pre-shared key (set via NewFioAuthClient s2sKey) in the X-S2S-Authorization header.
 func (c *FioAuthClient) S2SIssueToken(serviceName string) (*S2STokenResponse, error) {
 	var out S2STokenResponse
 	_, err := c.doJSON(http.MethodPost, "/api/v1/s2s/token", map[string]any{
 		"service_name": serviceName,
-	}, nil, &out)
+	}, s2sKeyHeader(c.s2sKey), &out)
 	if err != nil {
 		return nil, err
 	}
