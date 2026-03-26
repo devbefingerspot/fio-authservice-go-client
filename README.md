@@ -1,6 +1,6 @@
 # fio-auth-service-go-client
 
-Go client library untuk Fingerspot Auth Service. Menyediakan fungsi login, verifikasi JWT, OTP, S2S token, dan manajemen user-company.
+Go client library untuk Fingerspot Auth Service. Menyediakan fungsi login, verifikasi JWT, OTP, S2S token, manajemen user-company, dan gRPC client untuk query internal.
 
 ---
 
@@ -20,11 +20,21 @@ go get github.com/devbefingerspot/fio-authservice-go-client
 import authclient "github.com/devbefingerspot/fio-authservice-go-client"
 
 client := authclient.NewFioAuthClient(
-    "http://localhost:8080", // base URL auth service
-    30*time.Second,          // HTTP timeout
+    "http://localhost:8080",       // base URL auth service (HTTP)
+    "auth-grpc.example.com:50051", // base URL gRPC server (kosongkan untuk pakai host yang sama)
+    "my-api-key",                  // API key untuk gRPC (kosongkan jika tidak dipakai)
+    30*time.Second,                // HTTP timeout
     // optional: cache TTL untuk JWKS (default 5 menit)
     // 10*time.Minute,
 )
+defer client.Close() // tutup koneksi gRPC saat selesai
+```
+
+### Opsi Tambahan
+
+```go
+// Nonaktifkan TLS pada koneksi gRPC (hanya untuk development/local)
+client.WithGRPCInsecure()
 ```
 
 ---
@@ -186,6 +196,24 @@ resp, err := client.RegisterCompany(accessToken, "PT Contoh", "admin@contoh.com"
 
 ---
 
+### Manajemen User-Company
+
+```go
+// Tambah user ke company sebagai employee (butuh role admin/subadmin/owner)
+_, err := client.LinkUserToCompanyAsEmployee(accessToken, "company-uuid", "user-uuid")
+
+// Tambah user ke company sebagai subadmin (butuh role admin)
+_, err = client.LinkUserToCompanyAsSubAdmin(accessToken, "company-uuid", "user-uuid")
+
+// Tambah user ke company sebagai owner
+_, err = client.LinkUserToCompanyAsOwner(accessToken, "company-uuid", "user-uuid")
+
+// Hapus user dari company (role employee)
+_, err = client.UnlinkUserFromCompanyAsEmployee(accessToken, "company-uuid", "user-uuid")
+```
+
+---
+
 ### OTP
 
 ```go
@@ -247,18 +275,164 @@ _, err = client.S2SRegisterUser(s2sToken, map[string]any{
 
 ---
 
-### Manajemen User-Company
+## gRPC Client
+
+gRPC client digunakan untuk query internal antar service (server-to-server). Koneksi dibuat secara lazy (pertama kali method gRPC dipanggil) dan di-reuse untuk semua panggilan berikutnya.
+
+### Inisialisasi dengan gRPC
 
 ```go
-// Tambah user ke company
-_, err := client.LinkUserToCompanyAsEmployee(accessToken, companyID, userID)
-_, err = client.LinkUserToCompanyAsSubAdmin(accessToken, companyID, userID)
-_, err = client.LinkUserToCompanyAsOwner(accessToken, companyID, userID)
+client := authclient.NewFioAuthClient(
+    "http://localhost:8080",  // HTTP base URL
+    "localhost:50051",        // gRPC server address
+    "my-s2s-api-key",         // API key (dikirim sebagai metadata "authorization")
+    30*time.Second,
+)
 
-// Hapus user dari company
-_, err = client.UnlinkUserFromCompanyAsEmployee(accessToken, companyID, userID)
-_, err = client.UnlinkUserFromCompanyAsSubAdmin(accessToken, companyID, userID)
+// Untuk environment development (tanpa TLS):
+client.WithGRPCInsecure()
+
+// Pastikan koneksi ditutup saat program selesai:
+defer client.Close()
 ```
+
+> **Produksi**: TLS diaktifkan secara default (TLS 1.2+).  
+> **Development/local**: Panggil `WithGRPCInsecure()` sebelum request gRPC pertama.  
+> **API key**: Dikirim sebagai metadata header `authorization` pada setiap panggilan gRPC. Kosongkan jika tidak dipakai.
+
+---
+
+### GrpcCheckUser — Cek keberadaan user
+
+Memeriksa apakah user dengan ID tertentu ada, dan mengembalikan data profil dasar jika ditemukan.
+
+```go
+ctx := context.Background()
+
+result, err := client.GrpcCheckUser(ctx, "user-uuid")
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.Found {
+    fmt.Println("Nama:", result.User.Name)
+    fmt.Println("Email:", result.User.Email)
+    fmt.Println("Status:", result.User.Status)
+} else {
+    fmt.Println("User tidak ditemukan")
+}
+```
+
+**Tipe kembalian `GrpcCheckUserResult`:**
+
+| Field   | Tipe            | Keterangan                        |
+|---------|-----------------|-----------------------------------|
+| `Found` | `bool`          | `true` jika user ditemukan        |
+| `User`  | `*GrpcUserBasic`| `nil` jika `Found` adalah `false` |
+
+**Tipe `GrpcUserBasic`:**
+
+| Field       | Tipe     |
+|-------------|----------|
+| `ID`        | `string` |
+| `Name`      | `string` |
+| `Email`     | `string` |
+| `PhoneCode` | `string` |
+| `Phone`     | `string` |
+| `Status`    | `string` |
+
+---
+
+### GrpcCheckUserCompanyRelations — Cek semua relasi user di company
+
+Mengembalikan semua role yang dimiliki `userID` di dalam `companyID`.
+
+```go
+result, err := client.GrpcCheckUserCompanyRelations(ctx, "user-uuid", "company-uuid")
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.Found {
+    for _, rel := range result.Relations {
+        fmt.Println("Role:", rel.Role, "| Since:", rel.CreatedAt)
+    }
+} else {
+    fmt.Println("User tidak terdaftar di company ini")
+}
+```
+
+**Tipe kembalian `GrpcCheckUserCompanyRelationsResult`:**
+
+| Field       | Tipe                        | Keterangan                                     |
+|-------------|-----------------------------|------------------------------------------------|
+| `Found`     | `bool`                      | `false` jika user tidak punya relasi di company |
+| `Relations` | `[]GrpcUserCompanyRelation` | Daftar relasi (bisa lebih dari satu role)       |
+
+---
+
+### GrpcCheckUserCompanyRole — Cek role spesifik user di company
+
+Memeriksa apakah `userID` memiliki role tertentu di `companyID`.
+
+```go
+result, err := client.GrpcCheckUserCompanyRole(ctx, "user-uuid", "company-uuid", authclient.RoleEmployee)
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.Found {
+    fmt.Println("User adalah employee sejak:", result.Relation.CreatedAt)
+} else {
+    fmt.Println("User bukan employee di company ini")
+}
+```
+
+**Nilai `Role` yang valid:** `RoleEmployee`, `RoleOwner`, `RoleSubadmin`, `RoleAdmin`
+
+**Tipe kembalian `GrpcCheckUserCompanyRoleResult`:**
+
+| Field      | Tipe                      | Keterangan                           |
+|------------|---------------------------|--------------------------------------|
+| `Found`    | `bool`                    | `true` jika user punya role tersebut |
+| `Relation` | `*GrpcUserCompanyRelation`| `nil` jika `Found` adalah `false`    |
+
+---
+
+### GrpcGetUserAllRelations — Ambil semua relasi user lintas company
+
+Mengembalikan semua relasi company yang dimiliki `userID` di semua company.
+
+```go
+result, err := client.GrpcGetUserAllRelations(ctx, "user-uuid")
+if err != nil {
+    log.Fatal(err)
+}
+
+if result.Found {
+    for _, rel := range result.Relations {
+        fmt.Printf("Company: %s | Role: %s\n", rel.CompanyID, rel.Role)
+    }
+}
+```
+
+**Tipe kembalian `GrpcGetUserAllRelationsResult`:**
+
+| Field       | Tipe                        | Keterangan                               |
+|-------------|-----------------------------|------------------------------------------|
+| `Found`     | `bool`                      | `false` jika user tidak punya relasi     |
+| `Relations` | `[]GrpcUserCompanyRelation` | Semua relasi user di semua company        |
+
+---
+
+**Tipe `GrpcUserCompanyRelation`:**
+
+| Field       | Tipe        | Keterangan                          |
+|-------------|-------------|-------------------------------------|
+| `UserID`    | `string`    |                                     |
+| `CompanyID` | `string`    |                                     |
+| `Role`      | `Role`      | Salah satu konstanta `Role`         |
+| `CreatedAt` | `time.Time` | Dikonversi dari unix timestamp      |
 
 ---
 
@@ -281,3 +455,5 @@ _, err = client.UnlinkUserFromCompanyAsSubAdmin(accessToken, companyID, userID)
 - Error HTTP >= 400 dikembalikan sebagai `error` dengan pesan dari server.
 - `WebLogin` mengembalikan `"invalid_credentials"` sebagai string error untuk kemudahan assertion.
 - Fungsi yang membutuhkan company context (`OTPRequest`, `LinkUserToCompany`, dll.) akan menyertakan header `X-Company-ID` secara otomatis.
+- Koneksi gRPC dibuat secara lazy dan di-reuse; panggil `Close()` saat client tidak lagi dibutuhkan.
+- `WithGRPCInsecure()` harus dipanggil **sebelum** request gRPC pertama karena koneksi hanya dibuat sekali.
