@@ -1,4 +1,4 @@
-module local/fio-auth-service-client
+module github.com/devbefingerspot/fio-authservice-go-client
 
 go 1.25.0
 

@@ -7,7 +7,7 @@ Go client library untuk Fingerspot Auth Service. Menyediakan fungsi login, verif
 ## Instalasi
 
 ```bash
-go get local/fio-auth-service-client
+go get github.com/devbefingerspot/fio-authservice-go-client
 ```
 
 > Sesuaikan module path dengan konfigurasi `go.mod` di project kamu.
@@ -17,7 +17,7 @@ go get local/fio-auth-service-client
 ## Inisialisasi Client
 
 ```go
-import authclient "local/fio-auth-service-client"
+import authclient "github.com/devbefingerspot/fio-authservice-go-client"
 
 client := authclient.NewFioAuthClient(
     "http://localhost:8080", // base URL auth service

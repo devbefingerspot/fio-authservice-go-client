@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	ucpb "local/fio-auth-service-client/internal/pb/usercompany"
+	ucpb "github.com/devbefingerspot/fio-authservice-go-client/internal/pb/usercompany"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
