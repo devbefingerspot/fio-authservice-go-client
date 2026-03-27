@@ -66,3 +66,23 @@ func (c *FioAuthClient) S2SRegisterUser(s2sToken string, body map[string]any) (*
 	_, err := c.doJSON(http.MethodPost, "/api/v1/s2s/user/register", body, bearerHeader(s2sToken), &out)
 	return &out, err
 }
+
+// S2SRegisterPanelUser — POST /api/v1/s2s/panel-users
+//
+// Provisions a new panel user account. Called by trusted services or backend operators.
+// roles must contain at least one of: "internal", "channels".
+// status is optional; defaults to "active" if nil.
+func (c *FioAuthClient) S2SRegisterPanelUser(s2sToken, name, email, password string, roles []string, status *string) (*S2SRegisterPanelUserResponse, error) {
+	body := map[string]any{
+		"name":     name,
+		"email":    email,
+		"password": password,
+		"roles":    roles,
+	}
+	if status != nil {
+		body["status"] = *status
+	}
+	var out S2SRegisterPanelUserResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/s2s/panel-users", body, bearerHeader(s2sToken), &out)
+	return &out, err
+}

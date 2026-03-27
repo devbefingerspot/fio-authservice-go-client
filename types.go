@@ -60,3 +60,28 @@ const (
 	BackendModeNewWeb BackendModeEnum = "new_web"
 	BackendModeOldWeb BackendModeEnum = "old_web"
 )
+
+// SubjectType identifies the type of subject in a JWT token.
+type SubjectType string
+
+const (
+	SubjectTypeAppUser   SubjectType = "app_user"
+	SubjectTypePanelUser SubjectType = "panel_user"
+)
+
+// PanelRole represents a panel user's role.
+type PanelRole string
+
+const (
+	PanelRoleInternal PanelRole = "internal"
+	PanelRoleChannels PanelRole = "channels"
+)
+
+// PanelUserStatus represents the status of a panel user account.
+type PanelUserStatus string
+
+const (
+	PanelUserStatusActive    PanelUserStatus = "active"
+	PanelUserStatusInactive  PanelUserStatus = "inactive"
+	PanelUserStatusSuspended PanelUserStatus = "suspended"
+)

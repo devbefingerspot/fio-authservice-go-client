@@ -199,6 +199,56 @@ type UserInfoResponse struct {
 	Role    string          `json:"role"`
 }
 
+// PanelLoginResponse — POST /api/v1/panel/auth/login
+type PanelLoginResponse struct {
+	Message               string   `json:"message"`
+	PanelUserID           string   `json:"panel_user_id"`
+	Name                  string   `json:"name"`
+	Email                 string   `json:"email"`
+	PanelRoles            []string `json:"panel_roles"`
+	AccessToken           string   `json:"access_token"`
+	AccessTokenExpiresAt  int64    `json:"access_token_expires_at"`
+	RefreshToken          string   `json:"refresh_token"`
+	RefreshTokenExpiresAt int64    `json:"refresh_token_expires_at"`
+}
+
+// PanelRefreshTokenResponse — POST /api/v1/panel/auth/refresh
+type PanelRefreshTokenResponse struct {
+	AccessToken           string `json:"access_token"`
+	AccessTokenExpiresAt  int64  `json:"access_token_expires_at"`
+	RefreshToken          string `json:"refresh_token"`
+	RefreshTokenExpiresAt int64  `json:"refresh_token_expires_at"`
+	TokenType             string `json:"token_type"`
+}
+
+// PanelUserInfo holds the panel user profile returned by GET /api/v1/panel/me.
+type PanelUserInfo struct {
+	ID                string  `json:"id"`
+	Name              string  `json:"name"`
+	Email             string  `json:"email"`
+	Status            string  `json:"status"`
+	LastLoginAt       *string `json:"last_login_at,omitempty"`
+	PasswordChangedAt *string `json:"password_changed_at,omitempty"`
+	CreatedAt         string  `json:"created_at"`
+	UpdatedAt         string  `json:"updated_at"`
+}
+
+// PanelMeResponse — GET /api/v1/panel/me
+type PanelMeResponse struct {
+	PanelUser  PanelUserInfo `json:"panel_user"`
+	PanelRoles []string      `json:"panel_roles"`
+}
+
+// S2SRegisterPanelUserResponse — POST /api/v1/s2s/panel-users
+type S2SRegisterPanelUserResponse struct {
+	Message     string   `json:"message"`
+	PanelUserID string   `json:"panel_user_id"`
+	Name        string   `json:"name"`
+	Email       string   `json:"email"`
+	Roles       []string `json:"roles"`
+	Status      string   `json:"status"`
+}
+
 // S2SMessageResponse is a generic message response for S2S endpoints.
 type S2SMessageResponse struct {
 	Message string `json:"message"`

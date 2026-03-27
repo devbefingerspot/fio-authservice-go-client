@@ -7,17 +7,20 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// CustomClaims mirrors the JWT claims issued by the auth-service for regular users.
+// CustomClaims mirrors the JWT claims issued by the auth-service for both app users and panel users.
 type CustomClaims struct {
-	UserID       string    `json:"user_id,omitempty"`
-	OldUserID    *int      `json:"old_user_id,omitempty"`
-	CompanyID    string    `json:"company_id,omitempty"`
-	OldCompanyID *int      `json:"old_company_id,omitempty"`
-	Role         string    `json:"role,omitempty"`
-	Platform     Platform  `json:"platform,omitempty"`
-	TokenType    TokenType `json:"token_type,omitempty"`
-	SID          string    `json:"sid,omitempty"`
-	IsMobile     bool      `json:"is_mobile,omitempty"`
+	SubjectType  SubjectType `json:"subject_type,omitempty"`
+	UserID       string      `json:"user_id,omitempty"`
+	OldUserID    *int        `json:"old_user_id,omitempty"`
+	CompanyID    string      `json:"company_id,omitempty"`
+	OldCompanyID *int        `json:"old_company_id,omitempty"`
+	Role         string      `json:"role,omitempty"`
+	PanelUserID  string      `json:"panel_user_id,omitempty"`
+	PanelRoles   []string    `json:"panel_roles,omitempty"`
+	Platform     Platform    `json:"platform,omitempty"`
+	TokenType    TokenType   `json:"token_type,omitempty"`
+	SID          string      `json:"sid,omitempty"`
+	IsMobile     bool        `json:"is_mobile,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -60,6 +63,19 @@ func (c *FioAuthClient) VerifyAndParseClaims(tokenStr string) (*CustomClaims, er
 	}
 	if !token.Valid {
 		return nil, errors.New("token is not valid")
+	}
+	return claims, nil
+}
+
+// VerifyAndParsePanelClaims verifies a panel user JWT and returns its CustomClaims.
+// Returns an error if the token subject_type is not panel_user.
+func (c *FioAuthClient) VerifyAndParsePanelClaims(tokenStr string) (*CustomClaims, error) {
+	claims, err := c.VerifyAndParseClaims(tokenStr)
+	if err != nil {
+		return nil, err
+	}
+	if claims.SubjectType != SubjectTypePanelUser {
+		return nil, errors.New("token is not a panel user token")
 	}
 	return claims, nil
 }

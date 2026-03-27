@@ -1,7 +1,7 @@
 
 # fio-auth-service-go-client
 
-Go client library for Fingerspot Auth Service. Provides login functions, JWT verification, OTP, S2S token, user-company management, and a gRPC client for internal queries.
+Go client library for Fingerspot Auth Service. Provides login functions (app user and panel user), JWT verification, OTP, S2S token, panel user provisioning, user-company management, and a gRPC client for internal queries.
 
 ---
 
@@ -116,16 +116,25 @@ fmt.Println("Access Token:", companyResp.AccessToken)
 ### JWT Verification
 
 ```go
-// Regular user token
+// App user token
 claims, err := client.VerifyAndParseClaims(accessToken)
 if err != nil {
     log.Fatal("Invalid token:", err)
 }
+fmt.Println("Subject Type:", claims.SubjectType) // "app_user" or "panel_user"
 fmt.Println("User ID:", claims.UserID)
 fmt.Println("Company ID:", claims.CompanyID)
 fmt.Println("Role:", claims.Role)
 fmt.Println("Platform:", claims.Platform)
 fmt.Println("Token Type:", claims.TokenType)
+
+// Panel user token (enforces subject_type=panel_user)
+panelClaims, err := client.VerifyAndParsePanelClaims(panelAccessToken)
+if err != nil {
+    log.Fatal("Invalid panel token:", err)
+}
+fmt.Println("Panel User ID:", panelClaims.PanelUserID)
+fmt.Println("Panel Roles:", panelClaims.PanelRoles)
 
 // S2S (service-to-service) token
 s2sClaims, err := client.VerifyAndParseS2SClaims(s2sToken)
@@ -287,6 +296,18 @@ _, err = client.S2SRegisterUser(s2sToken, map[string]any{
     "password": "secret123",
     "name":     "Budi",
 })
+
+// Provision a new panel user (internal/channels)
+status := "active"
+resp, err = client.S2SRegisterPanelUser(
+    s2sToken,
+    "Budi Panel",                          // name
+    "budi.panel@example.com",              // email
+    "SecurePass123",                       // password (min 8 chars)
+    []string{"channels"},                  // roles: "internal" | "channels"
+    &status,                               // status: nil defaults to "active"
+)
+fmt.Println("Panel User ID:", resp.PanelUserID)
 ```
 
 > **S2S Security:**
@@ -294,6 +315,44 @@ _, err = client.S2SRegisterUser(s2sToken, map[string]any{
 > - Untuk generate S2S token, client harus mengisi parameter `s2sKey` pada constructor `NewFioAuthClient`.
 > - Library otomatis mengirim header `X-S2S-Authorization` saat request S2S token.
 > - Jika key salah atau tidak diisi, request akan gagal (401 Unauthorized).
+> - `S2SRegisterPanelUser` menggunakan S2S access token (bukan pre-shared key langsung).
+
+---
+
+
+### Panel Auth
+
+Panel auth dipakai untuk membedakan aktor `internal` dan `channels` dari user aplikasi biasa. Token panel memiliki `subject_type: panel_user` dan claim `panel_roles`.
+
+```go
+// Login panel user
+resp, err := client.PanelLogin("panel.internal@example.com", "password123")
+if err != nil {
+    if err.Error() == "invalid_credentials" {
+        log.Println("Email or password is incorrect")
+    }
+    log.Fatal(err)
+}
+fmt.Println("Panel User ID:", resp.PanelUserID)
+fmt.Println("Roles:", resp.PanelRoles)
+fmt.Println("Access Token:", resp.AccessToken)
+
+// Refresh panel access token
+refreshResp, err := client.PanelRefreshAccessToken(resp.RefreshToken)
+fmt.Println("New Access Token:", refreshResp.AccessToken)
+
+// Get current panel user info
+me, err := client.PanelMe(resp.AccessToken)
+fmt.Println("Name:", me.PanelUser.Name)
+fmt.Println("Email:", me.PanelUser.Email)
+fmt.Println("Roles:", me.PanelRoles)
+
+// Logout current panel session
+_, err = client.PanelLogout(resp.AccessToken)
+
+// Logout all panel sessions (all devices)
+_, err = client.PanelLogoutAllDevices(resp.AccessToken)
+```
 
 ---
 
@@ -544,6 +603,9 @@ if result.Found {
 | `OTPVerifyMode`     | `OTPVerifyModePhone`, `OTPVerifyModeEmail`                                                 |
 | `Role`              | `RoleEmployee`, `RoleOwner`, `RoleSubadmin`, `RoleAdmin`                                   |
 | `BackendModeEnum`   | `BackendModeNewWeb`, `BackendModeOldWeb`                                                   |
+| `SubjectType`       | `SubjectTypeAppUser`, `SubjectTypePanelUser`                                               |
+| `PanelRole`         | `PanelRoleInternal`, `PanelRoleChannels`                                                   |
+| `PanelUserStatus`   | `PanelUserStatusActive`, `PanelUserStatusInactive`, `PanelUserStatusSuspended`             |
 
 ---
 
@@ -552,7 +614,9 @@ if result.Found {
 
 - JWKS is automatically cached (default 5 minutes). Key rotation is handled with cache invalidation and automatic retry.
 - HTTP errors (>= 400) are returned as `error` with the server message.
-- `WebLogin` returns `"invalid_credentials"` as a string error for easier assertion.
+- `WebLogin` and `PanelLogin` return `"invalid_credentials"` as a string error for easier assertion.
 - Functions requiring company context (`OTPRequest`, `LinkUserToCompany`, etc.) will automatically include the `X-Company-ID` header.
+- Panel tokens carry `SubjectType: SubjectTypePanelUser`. Use `VerifyAndParsePanelClaims` to verify panel tokens and enforce this constraint.
+- Panel users are global actors — they are not tied to a company. `PanelRoles` in the token indicate their access level (`internal` or `channels`).
 - gRPC connection is created lazily and reused; call `Close()` when the client is no longer needed.
 - `WithGRPCInsecure()` must be called **before** the first gRPC request because the connection is created only once.
