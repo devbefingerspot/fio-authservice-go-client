@@ -158,6 +158,7 @@ type CompanyList struct {
 	OldID       *int            `json:"old_id"`
 	Name        string          `json:"name"`
 	Email       string          `json:"email"`
+	LogoURL     *string         `json:"logo_url,omitempty"`
 	Phone       *string         `json:"phone"`
 	Role        Role            `json:"role"`
 	BackendMode BackendModeEnum `json:"backend_mode"`
@@ -170,6 +171,7 @@ type UserInfoUser struct {
 	OldID           *int       `json:"old_id,omitempty"`
 	Name            string     `json:"name"`
 	Email           string     `json:"email"`
+	PhotoURL        *string    `json:"photo_url,omitempty"`
 	PhoneCode       *string    `json:"phone_code,omitempty"`
 	Phone           *string    `json:"phone,omitempty"`
 	Status          *string    `json:"status,omitempty"`
@@ -186,6 +188,7 @@ type UserInfoCompany struct {
 	OldID     *int       `json:"old_id,omitempty"`
 	Name      string     `json:"name"`
 	Email     string     `json:"email"`
+	LogoURL   *string    `json:"logo_url,omitempty"`
 	Phone     *string    `json:"phone,omitempty"`
 	DueDate   *time.Time `json:"due_date,omitempty"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -269,4 +272,79 @@ type S2SRegisterUserResponse struct {
 type S2SAPIErrorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
+}
+
+// InvitationStatus represents the status of a company invitation.
+type InvitationStatus string
+
+const (
+	InvitationStatusPending  InvitationStatus = "pending"
+	InvitationStatusAccepted InvitationStatus = "accepted"
+	InvitationStatusRejected InvitationStatus = "rejected"
+)
+
+// InvitationItem represents a single invitation in a list.
+type InvitationItem struct {
+	ID          string           `json:"id"`
+	CompanyID   string           `json:"company_id"`
+	CompanyName string           `json:"company_name"`
+	InviterID   string           `json:"inviter_id"`
+	InviterName string           `json:"inviter_name"`
+	Role        Role             `json:"role"`
+	Status      InvitationStatus `json:"status"`
+	CreatedAt   string           `json:"created_at"`
+}
+
+// CompanyInvitationItem represents a single invitation viewed from the company side.
+type CompanyInvitationItem struct {
+	ID          string           `json:"id"`
+	CompanyID   string           `json:"company_id"`
+	InviteeID   string           `json:"invitee_id"`
+	InviteeName string           `json:"invitee_name"`
+	InviterID   string           `json:"inviter_id"`
+	InviterName string           `json:"inviter_name"`
+	Role        Role             `json:"role"`
+	Status      InvitationStatus `json:"status"`
+	CreatedAt   string           `json:"created_at"`
+}
+
+// InvitationCreatedResponse — POST /api/v1/user-company/invite/employee
+type InvitationCreatedResponse struct {
+	Message    string         `json:"message"`
+	Invitation InvitationItem `json:"invitation"`
+}
+
+// InvitationsListResponse — GET /api/v1/user-company/invitations
+type InvitationsListResponse struct {
+	Invitations []InvitationItem `json:"invitations"`
+	Total       int              `json:"total"`
+}
+
+// CompanyInvitationsResponse — GET /api/v1/user-company/invitations/company
+type CompanyInvitationsResponse struct {
+	Invitations []CompanyInvitationItem `json:"invitations"`
+	Page        int                     `json:"page"`
+	PerPage     int                     `json:"per_page"`
+	Total       int64                   `json:"total"`
+	TotalPages  int                     `json:"total_pages"`
+}
+
+// InvitationStatusResponse — GET /api/v1/user-company/invitation/:id/status
+type InvitationStatusResponse struct {
+	InvitationID    string           `json:"invitation_id"`
+	CompanyID       string           `json:"company_id"`
+	InviteeID       string           `json:"invitee_id"`
+	InviteeName     string           `json:"invitee_name"`
+	InviteePhotoURL *string          `json:"invitee_photo_url"`
+	Role            Role             `json:"role"`
+	Status          InvitationStatus `json:"status"`
+	CreatedAt       string           `json:"created_at"`
+	UpdatedAt       string           `json:"updated_at"`
+}
+
+// S2SLookupUserResponse — POST /api/v1/s2s/user/lookup
+type S2SLookupUserResponse struct {
+	Found  bool   `json:"found"`
+	UserID string `json:"user_id,omitempty"`
+	Name   string `json:"name,omitempty"`
 }

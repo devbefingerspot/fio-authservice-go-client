@@ -29,8 +29,9 @@ type UserBasic struct {
 	PhoneCode       string                 `protobuf:"bytes,4,opt,name=phone_code,json=phoneCode,proto3" json:"phone_code,omitempty"`
 	Phone           string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
 	Status          string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	EmailVerifiedAt int64                  `protobuf:"varint,7,opt,name=email_verified_at,json=emailVerifiedAt,proto3" json:"email_verified_at,omitempty"`
-	PhoneVerifiedAt int64                  `protobuf:"varint,8,opt,name=phone_verified_at,json=phoneVerifiedAt,proto3" json:"phone_verified_at,omitempty"`
+	EmailVerifiedAt int64                  `protobuf:"varint,7,opt,name=email_verified_at,json=emailVerifiedAt,proto3" json:"email_verified_at,omitempty"` // unix timestamp (seconds), 0 when not verified
+	PhoneVerifiedAt int64                  `protobuf:"varint,8,opt,name=phone_verified_at,json=phoneVerifiedAt,proto3" json:"phone_verified_at,omitempty"` // unix timestamp (seconds), 0 when not verified
+	PhotoUrl        string                 `protobuf:"bytes,9,opt,name=photo_url,json=photoUrl,proto3" json:"photo_url,omitempty"`                         // empty string when not set
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -118,6 +119,13 @@ func (x *UserBasic) GetPhoneVerifiedAt() int64 {
 		return x.PhoneVerifiedAt
 	}
 	return 0
+}
+
+func (x *UserBasic) GetPhotoUrl() string {
+	if x != nil {
+		return x.PhotoUrl
+	}
+	return ""
 }
 
 type UserCompanyRelation struct {
@@ -597,6 +605,7 @@ type CompanyInfo struct {
 	EndpointId        string                 `protobuf:"bytes,6,opt,name=endpoint_id,json=endpointId,proto3" json:"endpoint_id,omitempty"`
 	DeviceLoginPolicy string                 `protobuf:"bytes,7,opt,name=device_login_policy,json=deviceLoginPolicy,proto3" json:"device_login_policy,omitempty"`
 	MaxDevices        int32                  `protobuf:"varint,8,opt,name=max_devices,json=maxDevices,proto3" json:"max_devices,omitempty"`
+	LogoUrl           string                 `protobuf:"bytes,9,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"` // empty string when not set
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -684,6 +693,13 @@ func (x *CompanyInfo) GetMaxDevices() int32 {
 		return x.MaxDevices
 	}
 	return 0
+}
+
+func (x *CompanyInfo) GetLogoUrl() string {
+	if x != nil {
+		return x.LogoUrl
+	}
+	return ""
 }
 
 type EndpointInfo struct {
@@ -867,7 +883,7 @@ var File_usercompany_usercompany_proto protoreflect.FileDescriptor
 
 const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\n" +
-	"\x1dusercompany/usercompany.proto\x12\vusercompany\"\xea\x01\n" +
+	"\x1dusercompany/usercompany.proto\x12\vusercompany\"\x87\x02\n" +
 	"\tUserBasic\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
@@ -877,7 +893,8 @@ const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12*\n" +
 	"\x11email_verified_at\x18\a \x01(\x03R\x0femailVerifiedAt\x12*\n" +
-	"\x11phone_verified_at\x18\b \x01(\x03R\x0fphoneVerifiedAt\"\x80\x01\n" +
+	"\x11phone_verified_at\x18\b \x01(\x03R\x0fphoneVerifiedAt\x12\x1b\n" +
+	"\tphoto_url\x18\t \x01(\tR\bphotoUrl\"\x80\x01\n" +
 	"\x13UserCompanyRelation\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
@@ -909,7 +926,7 @@ const file_usercompany_usercompany_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"s\n" +
 	"\x1bGetUserAllRelationsResponse\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x12>\n" +
-	"\trelations\x18\x02 \x03(\v2 .usercompany.UserCompanyRelationR\trelations\"\xea\x01\n" +
+	"\trelations\x18\x02 \x03(\v2 .usercompany.UserCompanyRelationR\trelations\"\x85\x02\n" +
 	"\vCompanyInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
@@ -920,7 +937,8 @@ const file_usercompany_usercompany_proto_rawDesc = "" +
 	"endpointId\x12.\n" +
 	"\x13device_login_policy\x18\a \x01(\tR\x11deviceLoginPolicy\x12\x1f\n" +
 	"\vmax_devices\x18\b \x01(\x05R\n" +
-	"maxDevices\"\x90\x01\n" +
+	"maxDevices\x12\x19\n" +
+	"\blogo_url\x18\t \x01(\tR\alogoUrl\"\x90\x01\n" +
 	"\fEndpointInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
 	"\fbackend_mode\x18\x02 \x01(\tR\vbackendMode\x12\x19\n" +

@@ -14,8 +14,9 @@ type GrpcUserBasic struct {
 	PhoneCode       string
 	Phone           string
 	Status          string
-	EmailVerifiedAt int64 // unix timestamp, 0 when not verified
-	PhoneVerifiedAt int64 // unix timestamp, 0 when not verified
+	EmailVerifiedAt int64  // unix timestamp, 0 when not verified
+	PhoneVerifiedAt int64  // unix timestamp, 0 when not verified
+	PhotoURL        string // empty when not set
 }
 
 // GrpcUserCompanyRelation represents a single user↔company relationship row.
@@ -60,6 +61,7 @@ type GrpcCompanyInfo struct {
 	EndpointID        string
 	DeviceLoginPolicy string
 	MaxDevices        int32
+	LogoURL           string // empty when not set
 }
 
 // GrpcEndpointInfo holds endpoint data returned by GetCompanyWithEndpoint.

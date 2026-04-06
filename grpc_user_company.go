@@ -72,6 +72,7 @@ func pbToUserBasic(u *ucpb.UserBasic) *GrpcUserBasic {
 		Status:          u.GetStatus(),
 		EmailVerifiedAt: u.GetEmailVerifiedAt(),
 		PhoneVerifiedAt: u.GetPhoneVerifiedAt(),
+		PhotoURL:        u.GetPhotoUrl(),
 	}
 }
 
@@ -212,6 +213,7 @@ func (c *FioAuthClient) GrpcGetCompanyWithEndpoint(ctx context.Context, companyI
 			EndpointID:        c.GetEndpointId(),
 			DeviceLoginPolicy: c.GetDeviceLoginPolicy(),
 			MaxDevices:        c.GetMaxDevices(),
+			LogoURL:           c.GetLogoUrl(),
 		}
 	}
 	if e := resp.GetEndpoint(); e != nil {
