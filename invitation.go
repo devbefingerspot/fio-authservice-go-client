@@ -120,3 +120,20 @@ func (c *FioAuthClient) GetCompanyInvitationStatusByID(accessToken, companyID, i
 	}
 	return &out, nil
 }
+
+// CancelInvitation — POST /api/v1/user-company/invitation/:id/cancel
+//
+// Cancels a pending invitation. Only admin, subadmin, or owner of the company can cancel.
+func (c *FioAuthClient) CancelInvitation(accessToken, companyID, invitationID string) (*S2SMessageResponse, error) {
+	var out S2SMessageResponse
+	_, err := c.doJSON(http.MethodPost,
+		fmt.Sprintf("/api/v1/user-company/invitation/%s/cancel", invitationID),
+		nil,
+		companyContextHeaders(accessToken, companyID),
+		&out,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
