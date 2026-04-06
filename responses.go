@@ -344,7 +344,11 @@ type InvitationStatusResponse struct {
 
 // S2SLookupUserResponse — POST /api/v1/s2s/user/lookup
 type S2SLookupUserResponse struct {
-	Found  bool   `json:"found"`
-	UserID string `json:"user_id,omitempty"`
-	Name   string `json:"name,omitempty"`
+	Found     bool   `json:"found"`
+	UserID    string `json:"user_id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+	PhoneCode string `json:"phone_code,omitempty"`
+	PhotoURL  string `json:"photo_url,omitempty"`
 }
