@@ -336,6 +336,7 @@ type InvitationStatusResponse struct {
 	InviteeID       string           `json:"invitee_id"`
 	InviteeName     string           `json:"invitee_name"`
 	InviteePhotoURL *string          `json:"invitee_photo_url"`
+	InviteeEmail    *string          `json:"invitee_email"`
 	Role            Role             `json:"role"`
 	Status          InvitationStatus `json:"status"`
 	CreatedAt       string           `json:"created_at"`
