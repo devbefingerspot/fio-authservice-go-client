@@ -33,6 +33,8 @@ const (
 	OTPVerifyTypePhone         OTPVerifyType = "phone_verification"
 	OTPVerifyTypeChangeDevice  OTPVerifyType = "change_device"
 	OTPVerifyTypeOther         OTPVerifyType = "other"
+	OTPVerifyTypeChangeEmail   OTPVerifyType = "change_email"
+	OTPVerifyTypeChangePhone   OTPVerifyType = "change_phone"
 )
 
 // OTPVerifyMode identifies the delivery channel for an OTP.

@@ -208,6 +208,58 @@ webCompanies, err := client.GetUserWebCompanies(accessToken)
 ---
 
 
+### Update User Profile
+
+```go
+// Update name only
+name := "John Doe"
+_, err := client.UpdateUserProfile(accessToken, &name, nil)
+
+// Update photo URL only
+photoURL := "https://cdn.example.com/photo.jpg"
+_, err = client.UpdateUserProfile(accessToken, nil, &photoURL)
+
+// Update both at once
+_, err = client.UpdateUserProfile(accessToken, &name, &photoURL)
+```
+
+> Accepts any token type (including identity token). At least one field must be non-nil.
+
+---
+
+
+### Change User Email
+
+```go
+// Step 1: Request OTP to current email
+_, err := client.OTPRequestEmailVerification(accessToken) // verify_type is set to "change_email" by you when calling OTPRequest directly
+// Or use the generic OTP request with verify_type = "change_email":
+_, err = client.OTPRequest(accessToken, companyID, authclient.OTPVerifyTypeChangeEmail, authclient.OTPVerifyModeEmail)
+
+// Step 2: Submit new email + OTP code
+_, err = client.ChangeUserEmail(accessToken, "newemail@example.com", "123456")
+```
+
+> Returns 409 if the new email is already used by another account.
+
+---
+
+
+### Change User Phone
+
+```go
+// Step 1: Request OTP to current email with verify_type "change_phone"
+_, err := client.OTPRequest(accessToken, companyID, authclient.OTPVerifyTypeChangePhone, authclient.OTPVerifyModeEmail)
+
+// Step 2: Submit new phone + OTP code
+_, err = client.ChangeUserPhone(accessToken, "+62", "81234567890", "123456")
+```
+
+> Returns 409 if the new phone number is already used by another account.
+
+---
+
+
 ### Register a New Company
 
 ```go
@@ -215,6 +267,30 @@ phone := "081234567890"
 resp, err := client.RegisterCompany(accessToken, "PT Example", "admin@example.com", &phone)
 // phone can be nil if not provided
 ```
+
+---
+
+
+### Update Company Data
+
+```go
+// Update company name only (requires admin, subadmin, or owner role)
+name := "PT New Name"
+_, err := client.UpdateCompany(accessToken, "company-uuid", &name, nil, nil, nil)
+
+// Update logo URL
+logoURL := "https://cdn.example.com/logo.png"
+_, err = client.UpdateCompany(accessToken, "company-uuid", nil, &logoURL, nil, nil)
+
+// Update device login policy and max devices
+policy := "trusted_device_rotate"
+maxDevices := 3
+_, err = client.UpdateCompany(accessToken, "company-uuid", nil, nil, &policy, &maxDevices)
+```
+
+> `deviceLoginPolicy` valid values: `"fixed_device"` or `"trusted_device_rotate"`.
+> `maxDevices` must be >= 1. Requires `X-Company-ID` context (passed via `companyID` parameter).
+> At least one field must be non-nil.
 
 ---
 

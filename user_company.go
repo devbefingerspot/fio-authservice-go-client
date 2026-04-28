@@ -99,3 +99,33 @@ func (c *FioAuthClient) ChangeCompanyEndpoint(accessToken, companyID, backendMod
 	}, companyContextHeaders(accessToken, companyID), &out)
 	return &out, err
 }
+
+// UpdateCompany — POST /api/v1/company/update
+//
+// Partially updates company data. All fields are optional; nil fields are not changed.
+// Requires admin, subadmin, or owner role.
+//
+// deviceLoginPolicy valid values: "fixed_device" or "trusted_device_rotate".
+func (c *FioAuthClient) UpdateCompany(
+	accessToken, companyID string,
+	name, logoURL *string,
+	deviceLoginPolicy *string,
+	maxDevices *int,
+) (*S2SMessageResponse, error) {
+	body := map[string]any{}
+	if name != nil {
+		body["name"] = *name
+	}
+	if logoURL != nil {
+		body["logo_url"] = *logoURL
+	}
+	if deviceLoginPolicy != nil {
+		body["device_login_policy"] = *deviceLoginPolicy
+	}
+	if maxDevices != nil {
+		body["max_devices"] = *maxDevices
+	}
+	var out S2SMessageResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/company/update", body, companyContextHeaders(accessToken, companyID), &out)
+	return &out, err
+}
