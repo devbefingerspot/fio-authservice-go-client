@@ -26,6 +26,33 @@ type RegisterFaceResponse struct {
 	UserOnlyRecord *FaceRegistryRecord `json:"user_only_record"`
 }
 
+// GetFaceRegistryResponse — GET /api/v1/user/face-registry
+//
+// Either field may be nil when the record does not exist.
+type GetFaceRegistryResponse struct {
+	CompanyRecord  *FaceRegistryRecord `json:"company_record"`
+	UserOnlyRecord *FaceRegistryRecord `json:"user_only_record"`
+}
+
+// GetFaceRegistry — GET /api/v1/user/face-registry
+//
+// Returns the company-scoped and user-only face-registry records for the target user.
+//
+//   - accessToken : company-scoped access token of the actor.
+//   - companyID   : company context (sent as X-Company-ID header).
+//   - targetUserID: the user whose registry to fetch.
+//     Pass an empty string ("") to fetch the actor's own registry.
+//     Fetching another user's registry requires admin, subadmin, or owner role.
+func (c *FioAuthClient) GetFaceRegistry(accessToken, companyID, targetUserID string) (*GetFaceRegistryResponse, error) {
+	path := "/api/v1/user/face-registry"
+	if targetUserID != "" {
+		path += "?target_user_id=" + targetUserID
+	}
+	var out GetFaceRegistryResponse
+	_, err := c.doJSON(http.MethodGet, path, nil, companyContextHeaders(accessToken, companyID), &out)
+	return &out, err
+}
+
 // RegisterFace — POST /api/v1/user/face-registry
 //
 // Registers or updates a face photo for a user within a company context.
