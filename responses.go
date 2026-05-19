@@ -252,6 +252,12 @@ type S2SRegisterPanelUserResponse struct {
 	Status      string   `json:"status"`
 }
 
+// S2SUpdatePanelUserResponse — PATCH /api/v1/s2s/panel-users/:id
+type S2SUpdatePanelUserResponse struct {
+	Message     string `json:"message"`
+	PanelUserID string `json:"panel_user_id"`
+}
+
 // S2SMessageResponse is a generic message response for S2S endpoints.
 type S2SMessageResponse struct {
 	Message string `json:"message"`

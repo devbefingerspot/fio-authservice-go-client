@@ -87,6 +87,32 @@ func (c *FioAuthClient) S2SRegisterPanelUser(s2sToken, name, email, password str
 	return &out, err
 }
 
+// S2SUpdatePanelUser — PATCH /api/v1/s2s/panel-users/:id
+//
+// Updates an existing panel user. Only non-nil fields are applied.
+// roles, if provided, replaces the user's entire role set.
+func (c *FioAuthClient) S2SUpdatePanelUser(s2sToken, panelUserID string, name, email, password, status *string, roles *[]string) (*S2SUpdatePanelUserResponse, error) {
+	body := map[string]any{}
+	if name != nil {
+		body["name"] = *name
+	}
+	if email != nil {
+		body["email"] = *email
+	}
+	if password != nil {
+		body["password"] = *password
+	}
+	if status != nil {
+		body["status"] = *status
+	}
+	if roles != nil {
+		body["roles"] = *roles
+	}
+	var out S2SUpdatePanelUserResponse
+	_, err := c.doJSON(http.MethodPatch, "/api/v1/s2s/panel-users/"+panelUserID, body, bearerHeader(s2sToken), &out)
+	return &out, err
+}
+
 // S2SLookupUser — POST /api/v1/s2s/user/lookup
 //
 // Looks up a user by email OR by phone+phoneCode.
