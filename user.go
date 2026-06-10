@@ -72,8 +72,8 @@ func (c *FioAuthClient) UpdateUserProfile(accessToken string, name, photoURL *st
 // ChangeUserEmail — POST /api/v1/user/change-email
 //
 // Changes the authenticated user's email address.
-// An OTP must be requested first via RequestEmailOTP with verify_type "change_email".
-// The OTP is sent to the user's current email.
+// Syarat: email lama harus sudah diverifikasi (EmailVerifiedAt != nil).
+// OTP harus diminta terlebih dahulu melalui OTPRequestChangeEmail (dikirim ke email BARU).
 func (c *FioAuthClient) ChangeUserEmail(accessToken, newEmail, otpCode string) (*S2SMessageResponse, error) {
 	var out S2SMessageResponse
 	_, err := c.doJSON(http.MethodPost, "/api/v1/user/change-email", map[string]any{
@@ -86,8 +86,8 @@ func (c *FioAuthClient) ChangeUserEmail(accessToken, newEmail, otpCode string) (
 // ChangeUserPhone — POST /api/v1/user/change-phone
 //
 // Changes the authenticated user's phone number.
-// An OTP must be requested first via RequestEmailOTP with verify_type "change_phone".
-// The OTP is sent to the user's current email.
+// Syarat: nomor telepon lama harus sudah diverifikasi (PhoneVerifiedAt != nil).
+// OTP harus diminta terlebih dahulu melalui OTPRequestChangePhone (dikirim ke nomor BARU via WhatsApp).
 func (c *FioAuthClient) ChangeUserPhone(accessToken, newPhoneCode, newPhone, otpCode string) (*S2SMessageResponse, error) {
 	var out S2SMessageResponse
 	_, err := c.doJSON(http.MethodPost, "/api/v1/user/change-phone", map[string]any{

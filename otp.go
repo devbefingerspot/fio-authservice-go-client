@@ -63,3 +63,30 @@ func (c *FioAuthClient) OTPVerifyPhone(accessToken, code string) (*OTPVerifyResp
 	}, bearerHeader(accessToken), &out)
 	return &out, err
 }
+
+// ── Change Email / Change Phone OTP (dikirim ke nomor/email BARU) ───────────
+
+// OTPRequestChangeEmail — POST /api/v1/otp/change-email/request
+//
+// Mengirim OTP ke email BARU untuk keperluan change email.
+// Syarat: email lama user harus sudah terverifikasi (EmailVerifiedAt != nil).
+func (c *FioAuthClient) OTPRequestChangeEmail(accessToken, newEmail string) (*OTPRequestResponse, error) {
+	var out OTPRequestResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/otp/change-email/request", map[string]any{
+		"new_email": newEmail,
+	}, bearerHeader(accessToken), &out)
+	return &out, err
+}
+
+// OTPRequestChangePhone — POST /api/v1/otp/change-phone/request
+//
+// Mengirim OTP ke nomor telepon BARU untuk keperluan change phone.
+// Syarat: nomor telepon lama user harus sudah terverifikasi (PhoneVerifiedAt != nil).
+func (c *FioAuthClient) OTPRequestChangePhone(accessToken, newPhoneCode, newPhone string) (*OTPRequestResponse, error) {
+	var out OTPRequestResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/otp/change-phone/request", map[string]any{
+		"new_phone_code": newPhoneCode,
+		"new_phone":      newPhone,
+	}, bearerHeader(accessToken), &out)
+	return &out, err
+}

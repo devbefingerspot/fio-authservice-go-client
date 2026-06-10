@@ -119,15 +119,23 @@ type S2STokenResponse struct {
 	Token string `json:"token"`
 }
 
-// OTPRequestResponse — POST /api/v1/otp/request, /otp/email/request, /otp/phone/request
+// OTPRequestResponse — POST /api/v1/otp/request, /otp/email/request, /otp/phone/request,
+// /otp/change-email/request, /otp/change-phone/request
 type OTPRequestResponse struct {
-	Message string `json:"message"`
-	Email   string `json:"email,omitempty"`
-	Phone   string `json:"phone,omitempty"`
+	Message  string `json:"message"`
+	Email    string `json:"email,omitempty"`
+	Phone    string `json:"phone,omitempty"`
+	NewEmail string `json:"new_email,omitempty"`
+	NewPhone string `json:"new_phone,omitempty"`
 }
 
 // OTPVerifyResponse — POST /api/v1/otp/verify, /otp/email/verify, /otp/phone/verify
 type OTPVerifyResponse struct {
+	Message string `json:"message"`
+}
+
+// ChangePasswordResponse — POST /api/v1/auth/change-password
+type ChangePasswordResponse struct {
 	Message string `json:"message"`
 }
 

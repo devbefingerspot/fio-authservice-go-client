@@ -26,15 +26,16 @@ const (
 type OTPVerifyType string
 
 const (
-	OTPVerifyTypeRegister      OTPVerifyType = "register"
-	OTPVerifyTypeLogin         OTPVerifyType = "login"
-	OTPVerifyTypeResetPassword OTPVerifyType = "reset_password"
-	OTPVerifyTypeEmail         OTPVerifyType = "email_verification"
-	OTPVerifyTypePhone         OTPVerifyType = "phone_verification"
-	OTPVerifyTypeChangeDevice  OTPVerifyType = "change_device"
-	OTPVerifyTypeOther         OTPVerifyType = "other"
-	OTPVerifyTypeChangeEmail   OTPVerifyType = "change_email"
-	OTPVerifyTypeChangePhone   OTPVerifyType = "change_phone"
+	OTPVerifyTypeRegister       OTPVerifyType = "register"
+	OTPVerifyTypeLogin          OTPVerifyType = "login"
+	OTPVerifyTypeResetPassword  OTPVerifyType = "reset_password"
+	OTPVerifyTypeEmail          OTPVerifyType = "email_verification"
+	OTPVerifyTypePhone          OTPVerifyType = "phone_verification"
+	OTPVerifyTypeChangeDevice   OTPVerifyType = "change_device"
+	OTPVerifyTypeOther          OTPVerifyType = "other"
+	OTPVerifyTypeChangeEmail    OTPVerifyType = "change_email"
+	OTPVerifyTypeChangePhone    OTPVerifyType = "change_phone"
+	OTPVerifyTypeChangePassword OTPVerifyType = "change_password"
 )
 
 // OTPVerifyMode identifies the delivery channel for an OTP.

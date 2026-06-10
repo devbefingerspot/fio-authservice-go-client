@@ -85,3 +85,19 @@ func (c *FioAuthClient) LogoutAllDevices(accessToken string) (*LogoutResponse, e
 	}
 	return &out, nil
 }
+
+// ChangePassword — POST /api/v1/auth/change-password
+//
+// Changes the authenticated user's password. Requires the current password,
+// an OTP code (requested via OTPRequest with verify_type "change_password"),
+// the new password, and the OTP delivery mode used.
+func (c *FioAuthClient) ChangePassword(accessToken, currentPassword, newPassword, otpCode string, verifyMode OTPVerifyMode) (*ChangePasswordResponse, error) {
+	var out ChangePasswordResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/auth/change-password", map[string]any{
+		"current_password": currentPassword,
+		"new_password":     newPassword,
+		"otp_code":         otpCode,
+		"verify_mode":      verifyMode,
+	}, bearerHeader(accessToken), &out)
+	return &out, err
+}
