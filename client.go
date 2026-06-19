@@ -21,6 +21,7 @@ import (
 
 	gocache "github.com/patrickmn/go-cache"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/stats"
 )
 
 // FioAuthClient is the main client for interacting with the auth-service.
@@ -37,6 +38,8 @@ type FioAuthClient struct {
 	grpcOnce    sync.Once
 	grpcConn    *grpc.ClientConn
 	grpcDialErr error
+
+	statsHandler stats.Handler
 }
 
 // NewFioAuthClient creates a new FioAuthClient.
@@ -139,6 +142,13 @@ func s2sKeyHeader(key string) map[string]string {
 // Must be called before the first gRPC method call.
 func (c *FioAuthClient) WithGRPCInsecure() *FioAuthClient {
 	c.grpcInsecure = true
+	return c
+}
+
+// WithStatsHandler sets a gRPC stats handler for instrumentation (e.g., otelgrpc client handler).
+// Must be called before the first gRPC method call.
+func (c *FioAuthClient) WithStatsHandler(sh stats.Handler) *FioAuthClient {
+	c.statsHandler = sh
 	return c
 }
 

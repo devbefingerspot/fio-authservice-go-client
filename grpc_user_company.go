@@ -29,9 +29,15 @@ func (c *FioAuthClient) grpcDial() (*grpc.ClientConn, error) {
 		} else {
 			creds = credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
 		}
+		opts := []grpc.DialOption{
+			grpc.WithTransportCredentials(creds),
+		}
+		if c.statsHandler != nil {
+			opts = append(opts, grpc.WithStatsHandler(c.statsHandler))
+		}
 		c.grpcConn, c.grpcDialErr = grpc.NewClient(
 			c.grpcBaseURL,
-			grpc.WithTransportCredentials(creds),
+			opts...,
 		)
 	})
 	return c.grpcConn, c.grpcDialErr
