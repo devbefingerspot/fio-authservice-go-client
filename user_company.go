@@ -70,25 +70,6 @@ func (c *FioAuthClient) UnlinkUserFromCompanyAsOwner(accessToken, companyID, use
 	return &out, err
 }
 
-// ChangeEmployeeDevice — POST /api/v1/user-device/change
-//
-// Updates the registered device for an employee.
-// Requires admin, subadmin, or owner access.
-func (c *FioAuthClient) ChangeEmployeeDevice(
-	accessToken, companyID, userID string,
-	deviceUUID, fcmToken, userAgent, detail string,
-) (*S2SMessageResponse, error) {
-	var out S2SMessageResponse
-	_, err := c.doJSON(http.MethodPost, "/api/v1/user-device/change", map[string]any{
-		"user_id":                  userID,
-		"device_unique_identifier": deviceUUID,
-		"fcm_token":                fcmToken,
-		"user_agent":               userAgent,
-		"detail":                   detail,
-	}, companyContextHeaders(accessToken, companyID), &out)
-	return &out, err
-}
-
 // ChangeCompanyEndpoint — POST /api/v1/company/change-endpoint
 //
 // Changes the backend mode of the company. Valid values: "new_web" or "old_web".
