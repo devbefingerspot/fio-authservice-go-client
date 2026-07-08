@@ -77,6 +77,7 @@ type PanelRole string
 const (
 	PanelRoleInternal PanelRole = "internal"
 	PanelRoleChannels PanelRole = "channels"
+	PanelRoleConsent  PanelRole = "consent"
 )
 
 // PanelUserStatus represents the status of a panel user account.
