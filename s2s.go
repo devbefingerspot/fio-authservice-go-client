@@ -139,3 +139,17 @@ func (c *FioAuthClient) S2SLookupUser(s2sToken string, email, phone, phoneCode *
 	}
 	return &out, nil
 }
+
+// S2SLookupPanelUser — POST /api/v1/s2s/panel-users/lookup
+//
+// Looks up a panel user by email. Returns Found=true with panel user details
+// when a match is found — same shape as S2SRegisterPanelUserResponse.
+func (c *FioAuthClient) S2SLookupPanelUser(s2sToken, email string) (*S2SLookupPanelUserResponse, error) {
+	body := map[string]any{"email": email}
+	var out S2SLookupPanelUserResponse
+	_, err := c.doJSON(http.MethodPost, "/api/v1/s2s/panel-users/lookup", body, bearerHeader(s2sToken), &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}

@@ -258,6 +258,16 @@ type S2SUpdatePanelUserResponse struct {
 	PanelUserID string `json:"panel_user_id"`
 }
 
+// S2SLookupPanelUserResponse — POST /api/v1/s2s/panel-users/lookup
+type S2SLookupPanelUserResponse struct {
+	Found       bool     `json:"found"`
+	PanelUserID string   `json:"panel_user_id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Email       string   `json:"email,omitempty"`
+	Roles       []string `json:"roles,omitempty"`
+	Status      string   `json:"status,omitempty"`
+}
+
 // S2SMessageResponse is a generic message response for S2S endpoints.
 type S2SMessageResponse struct {
 	Message string `json:"message"`
